@@ -14,15 +14,16 @@
  * @copyright (c) 2015 SMS Diagnostics Pty Ltd
  * @author Aron Steg
  * @author Mikhail Yurasov <mikhail@electricimp.com>
+ * @version 1.1.0
  */
 class Promise {
 
-    static version = [1, 0, 0];
+    static version = [1, 1, 0];
 
     _state = null;
     _value = null;
     _handlers = null;
-    
+
     constructor(fn) {
 
         const PROMISE_STATE_PENDING = 0;
@@ -33,9 +34,9 @@ class Promise {
         _handlers = [];
         _doResolve(fn, _resolve, _reject);
     }
-    
+
     // **** Private functions ****
-    
+
     function _fulfill(result) {
         _state = PROMISE_STATE_FULFILLED;
         _value = result;
@@ -44,7 +45,7 @@ class Promise {
         }
         _handlers = null;
     }
-    
+
     function _reject(error) {
         _state = PROMISE_STATE_REJECTED;
         _value = error;
@@ -52,8 +53,8 @@ class Promise {
             _handle(handler);
         }
         _handlers = null;
-    }    
-    
+    }
+
     function _resolve(result) {
         try {
             local then = _getThen(result);
@@ -66,7 +67,7 @@ class Promise {
             _reject(e);
         }
     }
-    
+
    /**
     * Check if a value is a Promise and, if it is,
     * return the `then` method of that promise.
@@ -88,7 +89,7 @@ class Promise {
 
         return null;
     }
-    
+
     function _doResolve(fn, onFulfilled, onRejected) {
         local done = false;
         try {
@@ -97,8 +98,8 @@ class Promise {
                     if (done) return;
                     done = true;
                     onFulfilled(value)
-                }.bindenv(this), 
-                
+                }.bindenv(this),
+
                 function (reason = null /* allow rejection without argument */) {
                     if (done) return;
                     done = true;
@@ -124,7 +125,7 @@ class Promise {
             }
         }
     }
-    
+
     // **** Public functions ****
 
     /**
@@ -148,7 +149,7 @@ class Promise {
     function fail(onRejected = null) {
         return then(null, onRejected);
     }
-    
+
     /**
      * Execute handler both on success and failure
      * @param {function|null} always

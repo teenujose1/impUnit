@@ -1,4 +1,4 @@
-// Suggests JSON 0.3.2 + Promise 1.1.0 libs available
+// Suggests JSONEncoder 0.4.0 + Promise 1.1.0 libs available
 
 /**
  * impUnit
@@ -105,7 +105,7 @@ class ImpUnitMessage {
    * Convert message to JSON
    */
   function toJSON() {
-    return JSON.stringify({
+    return JSONEncoder.encode({
       __IMPUNIT_MESSAGE__ = true,
       type = this.type,
       message = this.message
@@ -118,7 +118,7 @@ class ImpUnitMessage {
   function _tostring() {
     return "[impUnit:" + this.type + "] "
       + (typeof this.message == "table"
-          ? JSON.stringify(this.message)
+          ? JSONEncoder.encode(this.message)
           : this.message
         );
   }
