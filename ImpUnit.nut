@@ -235,7 +235,7 @@ class ImpUnitRunner {
       if (!success && this.stopOnFailure) {
         this._finish();
       } else {
-        this.run.call(this);
+        this.run.bindenv(this)();
       }
   }
 
