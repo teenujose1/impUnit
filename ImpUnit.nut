@@ -130,7 +130,7 @@ class ImpUnitMessage {
 class ImpUnitRunner {
 
   // public options
-  asyncTimeout = 2;
+  timeout = 2;
   readableOutput = true;
   stopOnFailure = false;
 
@@ -274,7 +274,7 @@ class ImpUnitRunner {
 
         // set the timeout timer
 
-        result.timerId = imp.wakeup(this.asyncTimeout, function () {
+        result.timerId = imp.wakeup(this.timeout, function () {
           if (result._state == 0 /* pending*/) {
             // set the timeout flag
             result.timedOut = true;
@@ -282,7 +282,7 @@ class ImpUnitRunner {
             // update assertions counter to ignore assertions afrer the timeout
             assertionsMade = testInstance.assertions;
 
-            this._done(false, "Timed out after " + this.asyncTimeout + "s", 0);
+            this._done(false, "Timed out after " + this.timeout + "s", 0);
           }
         }.bindenv(this));
 
