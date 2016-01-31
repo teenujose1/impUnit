@@ -107,7 +107,7 @@ class ImpUnitMessage {
    */
   function toJSON() {
     return JSONEncoder.encode({
-      __IMPUNIT_MESSAGE__ = true,
+      __IMPUNIT__ = 1,
       type = this.type,
       message = this.message
     });
