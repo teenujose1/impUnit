@@ -81,7 +81,8 @@ enum ImpUnitMessageTypes {
   result = "RESULT",
   debug = "DEBUG",
   status = "STATUS",
-  fail = "FAIL"
+  fail = "FAIL",
+  start = "START"
 }
 
 /**
@@ -133,6 +134,7 @@ class ImpUnitRunner {
   timeout = 2;
   readableOutput = true;
   stopOnFailure = false;
+  sessionId = null;
 
   tests = 0;
   assertions = 0;
@@ -145,6 +147,16 @@ class ImpUnitRunner {
   }
 
   /**
+   * Run tests
+   */
+  function run() {
+    if (this.sessionId) {
+      this._log(ImpUnitMessage(ImpUnitMessageTypes.start, {sessionId = this.sessionId}))
+    }
+
+    this._run();
+  }
+
    * Log message
    * @parame {ImpUnitMessage} message
    */
@@ -235,14 +247,14 @@ class ImpUnitRunner {
       if (!success && this.stopOnFailure) {
         this._finish();
       } else {
-        this.run.bindenv(this)();
+        this._run.bindenv(this)();
       }
   }
 
   /**
    * Run tests
    */
-  function run() {
+  function _run() {
 
     local test = resume this.testFunctions;
 
