@@ -142,7 +142,6 @@ class ImpUnitRunner {
   testFunctions = null;
 
   constructor() {
-    this.readableOutput = readableOutput;
     this.testFunctions = this._getTestFunctions();
   }
 
@@ -157,8 +156,10 @@ class ImpUnitRunner {
     this._run();
   }
 
+  /**
    * Log message
-   * @parame {ImpUnitMessage} message
+   * @param {ImpUnitMessage} message
+   * @private
    */
   function _log(message) {
     if (this.readableOutput) {
@@ -171,6 +172,7 @@ class ImpUnitRunner {
   /**
    * Loog for test cases/test functions
    * @returns {generator}
+   * @private
    */
   function _getTestFunctions() {
 
@@ -217,6 +219,7 @@ class ImpUnitRunner {
 
   /**
    * We're done
+   * @private
    */
   function _finish() {
     // log result message
@@ -232,6 +235,7 @@ class ImpUnitRunner {
    * @param {bool} success
    * @param {*} result - resolution/rejection argument
    * @param {integer} assertions - # of assettions made
+   * @private
    */
   function _done(success, result, assertions) {
       if (!success) {
@@ -253,6 +257,7 @@ class ImpUnitRunner {
 
   /**
    * Run tests
+   * @private
    */
   function _run() {
 
