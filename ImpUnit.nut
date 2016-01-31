@@ -4,7 +4,7 @@
  * impUnit
  * In-dev version, major changes can occur!
  *
- * @version 0.0.1-dev @ 14/01/2016 11:05PM
+ * @version 0.1.0-dev
  * @author Mikhail Yurasov <mikhail@electricimp.com>
  */
 
@@ -116,11 +116,11 @@ class ImpUnitMessage {
   /**
    * Convert to human-readable string
    */
-  function _tostring() {
+  function toString() {
     return "[impUnit:" + this.type + "] "
-      + (typeof this.message == "table"
-          ? JSONEncoder.encode(this.message)
-          : this.message
+      + (typeof this.message == "string"
+          ? this.message
+          : JSONEncoder.encode(this.message)
         );
   }
 }
@@ -163,7 +163,7 @@ class ImpUnitRunner {
    */
   function _log(message) {
     if (this.readableOutput) {
-      server.log(message)
+      server.log(message.toString() /* use custom conversion method to avoid stack resizing limitations on metamethods */)
     } else {
       server.log(message.toJSON());
     }
