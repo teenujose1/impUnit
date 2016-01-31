@@ -13,6 +13,8 @@ _Please note that this is still under development and published for preview purp
 
 Unit Testing Framework for EI/Squirrel.
 
+_Version: 0.1.0-dev_
+
 ## License
 
 The code in this repository is licensed under [MIT License](https://github.com/electricimp/serializer/tree/master/LICENSE).

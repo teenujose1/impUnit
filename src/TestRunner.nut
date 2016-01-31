@@ -1,11 +1,6 @@
-// Suggests JSONEncoder 0.4.0 + Promise 1.1.0 libs available
-
 /**
- * impUnit
- * In-dev version, major changes can occur!
- *
- * @version 0.1.0-dev
- * @author Mikhail Yurasov <mikhail@electricimp.com>
+ * Test runner
+ * @package ImpUnit
  */
 
 // extend Promise for our needs
@@ -13,116 +8,6 @@
 class Promise extends Promise {
   timedOut = false;
   timerId = null;
-}
-
-/**
- * Base for test cases
- */
-class ImpUnitCase {
-
-  assertions = 0;
-
-  /**
-   * Assert that something is true
-   * @param {bool} condition
-   * @param {string|false} message
-   */
-  function assertTrue(condition, message = false) {
-    this.assertions++;
-    if (!condition) {
-      throw message ? message : "Failed to assert that condition is true";
-    }
-  }
-
-  /**
-   * Assert that two values are equal
-   * @param {bool} condition
-   * @param {string|false} message
-   */
-   function assertEqual(expected, actual, message = false) {
-    this.assertions++;
-    if (expected != actual) {
-      throw message ? message : "Expected value: " + expected + ", got: " + actual;
-    }
-  }
-
-  /**
-   * Assert that two values are within a certain range
-   * @param {bool} condition
-   * @param {string|false} message
-   */
-  function assertClose(expected, actual, maxDiff, message = false) {
-    this.assertions++;
-    if (math.abs(expected - actual) > maxDiff) {
-      throw message ? message :
-        "Expected value: " + expected + "±" + maxDiff + ", got: " + actual;
-    }
-  }
-
-  /**
-   * Setup test case
-   * Can be async
-   * @return {Promise|*}
-   */
-  function setUp() {}
-
-  /**
-   * Teardown test case
-   * Can be async
-   * @return {Promise|*}
-   */
-  function tearDown() {
-  }
-
-}
-
-// message types
-enum ImpUnitMessageTypes {
-  result = "RESULT",
-  debug = "DEBUG",
-  status = "STATUS",
-  fail = "FAIL",
-  start = "START"
-}
-
-/**
- * Test message
- */
-class ImpUnitMessage {
-
-  type = "";
-  message = "";
-
-  /**
-   * @param {ImpUnitMessageTypes} type - Message type
-   * @param {string} message - Message
-   */
-  constructor(type, message = "") {
-    this.type = type;
-    this.message = message;
-  }
-
-  /**
-   * Convert message to JSON
-   */
-  function toJSON() {
-    return JSONEncoder.encode({
-      __IMPUNIT__ = 1,
-      type = this.type,
-      message = this.message
-    });
-  }
-
-  /**
-   * Convert to human-readable string
-   */
-  function toString() {
-    return "[impUnit:" + this.type + "] "
-      + (typeof this.message == "string"
-          ? this.message
-          : JSONEncoder.encode(this.message)
-        );
-  }
 }
 
 /**

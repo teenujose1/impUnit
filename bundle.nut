@@ -1,3 +1,7 @@
-// #include "JSONEncoder.class.nut"
-// #include "Promise.class.nut"
-// #include "ImpUnit.nut"
+// #include "lib/JSONEncoder.class.nut"
+
+// #ifdef PROMISE
+// #include "lib/Promise.class.nut"
+// #endif
+
+// #include "src/ImpUnit.nut"
