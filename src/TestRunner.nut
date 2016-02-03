@@ -19,7 +19,7 @@ class ImpUnitRunner {
   timeout = 2;
   readableOutput = true;
   stopOnFailure = false;
-  sessionId = null;
+  session = null;
 
   tests = 0;
   assertions = 0;
@@ -34,10 +34,7 @@ class ImpUnitRunner {
    * Run tests
    */
   function run() {
-    if (this.sessionId) {
-      this._log(ImpUnitMessage(ImpUnitMessageTypes.start, {sessionId = this.sessionId}))
-    }
-
+    this._log(ImpUnitMessage(ImpUnitMessageTypes.start))
     this._run();
   }
 
@@ -47,6 +44,9 @@ class ImpUnitRunner {
    * @private
    */
   function _log(message) {
+    // set session id
+    message.session = this.session;
+
     if (this.readableOutput) {
       server.log(message.toString() /* use custom conversion method to avoid stack resizing limitations on metamethods */)
     } else {

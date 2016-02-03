@@ -19,6 +19,7 @@ class ImpUnitMessage {
 
   type = "";
   message = "";
+  session = "";
 
   /**
    * @param {ImpUnitMessageTypes} type - Message type
@@ -36,6 +37,7 @@ class ImpUnitMessage {
     return JSONEncoder.encode({
       __IMPUNIT__ = 1,
       type = this.type,
+      session = this.session,
       message = this.message
     });
   }
