@@ -5,11 +5,12 @@
 
 // message types
 enum ImpUnitMessageTypes {
-  result = "RESULT",
-  debug = "DEBUG",
+  start = "START",
   status = "STATUS",
+  ok = "OK",
   fail = "FAIL",
-  start = "START"
+  result = "RESULT",
+  debug = "DEBUG"
 }
 
 /**

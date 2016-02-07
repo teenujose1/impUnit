@@ -127,6 +127,9 @@ class ImpUnitRunner {
         // log failure
         this.failures++;
         this._log(ImpUnitMessage(ImpUnitMessageTypes.fail, result));
+      } else {
+        // log test method success
+        this._log(ImpUnitMessage(ImpUnitMessageTypes.ok, result));
       }
 
       // update assertions number
