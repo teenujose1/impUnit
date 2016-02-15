@@ -5,12 +5,12 @@
 
 // message types
 enum ImpUnitMessageTypes {
-  start = "START",
-  status = "STATUS",
-  ok = "OK",
-  fail = "FAIL",
-  result = "RESULT",
-  debug = "DEBUG"
+  start = "START", // session start
+  testStart = "TEST_START", // test start
+  testOk = "TEST_OK", // test success
+  testFail = "TEST_FAIL", // test failure
+  result = "RESULT", // session result
+  debug = "DEBUG" // debug message
 }
 
 /**

@@ -70,7 +70,7 @@ class ImpUnitRunner {
         local testInstance = rootValue();
 
         // log setUp() execution
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.status, rootKey + "::setUp()"));
+        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::setUp()"));
 
         // yield setUp method
         yield [testInstance, testInstance.setUp.bindenv(testInstance)];
@@ -80,7 +80,7 @@ class ImpUnitRunner {
           // we need test* methods
           if (memberKey.len() >= 4 && memberKey.slice(0, 4) == "test") {
             // log test method execution
-            this._log(ImpUnitMessage(ImpUnitMessageTypes.status, rootKey + "::" + memberKey + "()"));
+            this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::" + memberKey + "()"));
 
             this.tests++;
 
@@ -90,7 +90,7 @@ class ImpUnitRunner {
         }
 
         // log tearDown() execution
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.status, rootKey + "::tearDown()"));
+        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::tearDown()"));
 
         // yield tearDown method
         yield [testInstance, testInstance.tearDown.bindenv(testInstance)];
@@ -126,10 +126,10 @@ class ImpUnitRunner {
       if (!success) {
         // log failure
         this.failures++;
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.fail, result));
+        this._log(ImpUnitMessage(ImpUnitMessageTypes.testFail, result));
       } else {
         // log test method success
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.ok, result));
+        this._log(ImpUnitMessage(ImpUnitMessageTypes.testOk, result));
       }
 
       // update assertions number
