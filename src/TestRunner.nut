@@ -34,7 +34,7 @@ class ImpUnitRunner {
    * Run tests
    */
   function run() {
-    this._log(ImpUnitMessage(ImpUnitMessageTypes.start))
+    this._log(ImpUnitMessage(ImpUnitMessageTypes.sessionStart))
     this._run();
   }
 
@@ -108,7 +108,7 @@ class ImpUnitRunner {
    */
   function _finish() {
     // log result message
-    this._log(ImpUnitMessage(ImpUnitMessageTypes.result, {
+    this._log(ImpUnitMessage(ImpUnitMessageTypes.sessionResult, {
       tests = this.tests,
       assertions = this.assertions,
       failures = this.failures
