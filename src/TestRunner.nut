@@ -67,13 +67,13 @@ class ImpUnitRunner {
       if (type(rootValue) == "class" && rootValue.getbase() == ImpUnitCase) {
 
         // create instance of the test class
-        local testInstance = rootValue();
+        local testCase = rootValue();
 
         // log setUp() execution
         this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::setUp()"));
 
         // yield setUp method
-        yield [testInstance, testInstance.setUp.bindenv(testInstance)];
+        yield [testCase, testCase.setUp.bindenv(testCase)];
 
         // iterate through members of test class
         foreach (memberKey, memberValue in rootValue) {
@@ -85,7 +85,7 @@ class ImpUnitRunner {
             this.tests++;
 
             // yield test method
-            yield [testInstance, memberValue.bindenv(testInstance)];
+            yield [testCase, memberValue.bindenv(testCase)];
           }
         }
 
@@ -93,7 +93,7 @@ class ImpUnitRunner {
         this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::tearDown()"));
 
         // yield tearDown method
-        yield [testInstance, testInstance.tearDown.bindenv(testInstance)];
+        yield [testCase, testCase.tearDown.bindenv(testCase)];
       }
 
     }
@@ -153,7 +153,7 @@ class ImpUnitRunner {
 
     if (test) {
 
-      local testInstance = test[0];
+      local testCase = test[0];
       local testMethod = test[1];
       local result = null;
       local assertionsMade;
@@ -165,7 +165,7 @@ class ImpUnitRunner {
       collectgarbage();
 
       try {
-        assertionsMade = testInstance.assertions;
+        assertionsMade = testCase.assertions;
         result = testMethod();
       } catch (e) {
 
@@ -185,7 +185,7 @@ class ImpUnitRunner {
             result.timedOut = true;
 
             // update assertions counter to ignore assertions afrer the timeout
-            assertionsMade = testInstance.assertions;
+            assertionsMade = testCase.assertions;
 
             this._done(false, "Timed out after " + this.timeout + "s", 0);
           }
@@ -198,14 +198,14 @@ class ImpUnitRunner {
           // we're fine
           .then(function (message) {
             if (!result.timedOut) {
-              this._done(true, message, testInstance.assertions - assertionsMade);
+              this._done(true, message, testCase.assertions - assertionsMade);
             }
           }.bindenv(this))
 
           // we're screwed
           .fail(function (reason) {
             if (!result.timedOut) {
-              this._done(false, reason, testInstance.assertions - assertionsMade);
+              this._done(false, reason, testCase.assertions - assertionsMade);
             }
           }.bindenv(this))
 
@@ -220,7 +220,7 @@ class ImpUnitRunner {
 
       } else {
         // test was sync one
-        this._done(syncSuccess, syncMessage, testInstance.assertions - assertionsMade);
+        this._done(syncSuccess, syncMessage, testCase.assertions - assertionsMade);
       }
 
     } else {
