@@ -163,8 +163,6 @@ class ImpUnitRunner {
 
     if (test) {
 
-      local testCase = test["case"];
-      local testMethod = test["method"];
       local assertionsMade;
 
       local testResult = {
@@ -173,34 +171,30 @@ class ImpUnitRunner {
         timedOut = false
       };
 
-      local syncSuccess = true;
-      local syncMessage = "";
-
       // do GC before each run
       collectgarbage();
 
       try {
-        assertionsMade = testCase.assertions;
-        testResult.result = testMethod();
+        assertionsMade = test["case"].assertions;
+        testResult.result = test.method();
       } catch (e) {
-
         // store sync test info
-        syncSuccess = false;
-        syncMessage = e;
-
+        test.error <- e;
       }
 
-      if (testResult.result instanceof Promise) {
+      // detect if test is async
+      test.async <- testResult.result instanceof Promise;
+
+      if (test.async) {
 
         // set the timeout timer
-
         testResult.timerId = imp.wakeup(this.timeout, function () {
           if (testResult.result.isPending()) {
             // set the timeout flag
             testResult.timedOut = true;
 
             // update assertions counter to ignore assertions afrer the timeout
-            assertionsMade = testCase.assertions;
+            assertionsMade = test["case"].assertions;
 
             this._done(false, "Timed out after " + this.timeout + "s", 0);
           }
@@ -212,30 +206,40 @@ class ImpUnitRunner {
 
           // we're fine
           .then(function (message) {
-            if (!testResult.timedOut) {
-              this._done(true, message, testCase.assertions - assertionsMade);
-            }
-          }.bindenv(this))
+            test.message <- message;
+          })
 
           // we're screwed
-          .fail(function (reason) {
-            if (!testResult.timedOut) {
-              this._done(false, reason, testCase.assertions - assertionsMade);
-            }
-          }.bindenv(this))
+          .fail(function (error) {
+            test.error <- error;
+          })
 
           // anyways...
           .finally(function(e) {
+
             // cancel timeout detection
             if (testResult.timerId) {
               imp.cancelwakeup(testResult.timerId);
               testResult.timerId = null;
             }
-          });
+
+            if (!testResult.timedOut) {
+              if ("error" in test) {
+                this._done(false /* failure */, test.error, test["case"].assertions - assertionsMade);
+              } else {
+                this._done(true /* success */, test.message, test["case"].assertions - assertionsMade);
+              }
+            }
+
+          }.bindenv(this));
 
       } else {
-        // test was sync one
-        this._done(syncSuccess, syncMessage, testCase.assertions - assertionsMade);
+        // test was sync
+        if ("error" in test) {
+          this._done(false /* failure */, test.error, test["case"].assertions - assertionsMade);
+        } else {
+          this._done(true /* success */, testResult.result, test["case"].assertions - assertionsMade);
+        }
       }
 
     } else {
