@@ -6,9 +6,6 @@
 // extend Promise for our needs
 // don't do this at home
 class Promise extends Promise {
-  timedOut = false;
-  timerId = null;
-
   function isPending() {
     return this._state == 0;
   }
@@ -19,16 +16,16 @@ class Promise extends Promise {
  */
 class ImpUnitRunner {
 
-  // public options
+  // options
   timeout = 2;
   readableOutput = true;
   stopOnFailure = false;
   session = null;
 
+  // result
   tests = 0;
   assertions = 0;
   failures = 0;
-  testFunctions = null;
 
   _testsGenerator = null;
 
@@ -169,7 +166,12 @@ class ImpUnitRunner {
       local testCase = test["case"];
       local testMethod = test["method"];
       local assertionsMade;
-      local result = null;
+
+      local testResult = {
+        result = null,
+        timerId = null,
+        timedOut = false
+      };
 
       local syncSuccess = true;
       local syncMessage = "";
@@ -179,7 +181,7 @@ class ImpUnitRunner {
 
       try {
         assertionsMade = testCase.assertions;
-        result = testMethod();
+        testResult.result = testMethod();
       } catch (e) {
 
         // store sync test info
@@ -188,14 +190,14 @@ class ImpUnitRunner {
 
       }
 
-      if (result instanceof Promise) {
+      if (testResult.result instanceof Promise) {
 
         // set the timeout timer
 
-        result.timerId = imp.wakeup(this.timeout, function () {
-          if (result.isPending()) {
+        testResult.timerId = imp.wakeup(this.timeout, function () {
+          if (testResult.result.isPending()) {
             // set the timeout flag
-            result.timedOut = true;
+            testResult.timedOut = true;
 
             // update assertions counter to ignore assertions afrer the timeout
             assertionsMade = testCase.assertions;
@@ -206,18 +208,18 @@ class ImpUnitRunner {
 
         // handle result
 
-        result
+        testResult.result
 
           // we're fine
           .then(function (message) {
-            if (!result.timedOut) {
+            if (!testResult.timedOut) {
               this._done(true, message, testCase.assertions - assertionsMade);
             }
           }.bindenv(this))
 
           // we're screwed
           .fail(function (reason) {
-            if (!result.timedOut) {
+            if (!testResult.timedOut) {
               this._done(false, reason, testCase.assertions - assertionsMade);
             }
           }.bindenv(this))
@@ -225,9 +227,9 @@ class ImpUnitRunner {
           // anyways...
           .finally(function(e) {
             // cancel timeout detection
-            if (result.timerId) {
-              imp.cancelwakeup(result.timerId);
-              result.timerId = null;
+            if (testResult.timerId) {
+              imp.cancelwakeup(testResult.timerId);
+              testResult.timerId = null;
             }
           });
 
