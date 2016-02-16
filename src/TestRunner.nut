@@ -64,7 +64,7 @@ class ImpUnitRunner {
     // iterate through the
     foreach (rootKey, rootValue in getroottable()) {
 
-      if (type(rootValue) == "class" && rootValue.getbase() == ImpUnitCase) {
+      if (type(rootValue) == "class" && rootValue.getbase() == ImpTestCase) {
 
         // create instance of the test class
         local testCase = rootValue();

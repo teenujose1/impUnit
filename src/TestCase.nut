@@ -2,7 +2,7 @@
  * Base for test cases
  * @package ImpUnit
  */
-class ImpUnitCase {
+class ImpTestCase {
 
   assertions = 0;
 
