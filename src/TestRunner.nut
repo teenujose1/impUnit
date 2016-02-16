@@ -4,10 +4,14 @@
  */
 
 // extend Promise for our needs
-// don't do this, children
+// don't do this at home
 class Promise extends Promise {
   timedOut = false;
   timerId = null;
+
+  function isPending() {
+    return this._state == 0;
+  }
 }
 
 /**
@@ -26,15 +30,14 @@ class ImpUnitRunner {
   failures = 0;
   testFunctions = null;
 
-  constructor() {
-    this.testFunctions = this._getTestFunctions();
-  }
+  _testsGenerator = null;
 
   /**
    * Run tests
    */
   function run() {
     this._log(ImpUnitMessage(ImpUnitMessageTypes.sessionStart))
+    this._testsGenerator = this._findTests();
     this._run();
   }
 
@@ -59,7 +62,7 @@ class ImpUnitRunner {
    * @returns {generator}
    * @private
    */
-  function _getTestFunctions() {
+  function _findTests() {
 
     // iterate through the
     foreach (rootKey, rootValue in getroottable()) {
@@ -73,11 +76,14 @@ class ImpUnitRunner {
         this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::setUp()"));
 
         // yield setUp method
-        yield [testCase, testCase.setUp.bindenv(testCase)];
+        yield {
+          "case" : testCase,
+          "method" : testCase.setUp.bindenv(testCase)
+        };
 
         // iterate through members of test class
         foreach (memberKey, memberValue in rootValue) {
-          // we need test* methods
+          // look for test* methods
           if (memberKey.len() >= 4 && memberKey.slice(0, 4) == "test") {
             // log test method execution
             this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::" + memberKey + "()"));
@@ -85,15 +91,22 @@ class ImpUnitRunner {
             this.tests++;
 
             // yield test method
-            yield [testCase, memberValue.bindenv(testCase)];
+            yield {
+              "case" : testCase,
+              "method" : memberValue.bindenv(testCase)
+            };
           }
+
         }
 
         // log tearDown() execution
         this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::tearDown()"));
 
         // yield tearDown method
-        yield [testCase, testCase.tearDown.bindenv(testCase)];
+        yield {
+          "case" : testCase,
+          "method" : testCase.tearDown.bindenv(testCase)
+        };
       }
 
     }
@@ -149,14 +162,14 @@ class ImpUnitRunner {
    */
   function _run() {
 
-    local test = resume this.testFunctions;
+    local test = resume this._testsGenerator;
 
     if (test) {
 
-      local testCase = test[0];
-      local testMethod = test[1];
-      local result = null;
+      local testCase = test["case"];
+      local testMethod = test["method"];
       local assertionsMade;
+      local result = null;
 
       local syncSuccess = true;
       local syncMessage = "";
@@ -180,7 +193,7 @@ class ImpUnitRunner {
         // set the timeout timer
 
         result.timerId = imp.wakeup(this.timeout, function () {
-          if (result._state == 0 /* pending*/) {
+          if (result.isPending()) {
             // set the timeout flag
             result.timedOut = true;
 
