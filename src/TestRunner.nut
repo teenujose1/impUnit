@@ -4,10 +4,11 @@
  */
 
 // extend Promise for our needs
-// don't do this, children
+// don't do this at home
 class Promise extends Promise {
-  timedOut = false;
-  timerId = null;
+  function isPending() {
+    return this._state == 0;
+  }
 }
 
 /**
@@ -15,26 +16,25 @@ class Promise extends Promise {
  */
 class ImpUnitRunner {
 
-  // public options
+  // options
   timeout = 2;
   readableOutput = true;
   stopOnFailure = false;
   session = null;
 
+  // result
   tests = 0;
   assertions = 0;
   failures = 0;
-  testFunctions = null;
 
-  constructor() {
-    this.testFunctions = this._getTestFunctions();
-  }
+  _testsGenerator = null;
 
   /**
    * Run tests
    */
   function run() {
     this._log(ImpUnitMessage(ImpUnitMessageTypes.sessionStart))
+    this._testsGenerator = this._findTests();
     this._run();
   }
 
@@ -59,25 +59,28 @@ class ImpUnitRunner {
    * @returns {generator}
    * @private
    */
-  function _getTestFunctions() {
+  function _findTests() {
 
     // iterate through the
     foreach (rootKey, rootValue in getroottable()) {
 
-      if (type(rootValue) == "class" && rootValue.getbase() == ImpUnitCase) {
+      if (type(rootValue) == "class" && rootValue.getbase() == ImpTestCase) {
 
         // create instance of the test class
-        local testInstance = rootValue();
+        local testCase = rootValue();
 
         // log setUp() execution
         this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::setUp()"));
 
         // yield setUp method
-        yield [testInstance, testInstance.setUp.bindenv(testInstance)];
+        yield {
+          "case" : testCase,
+          "method" : testCase.setUp.bindenv(testCase)
+        };
 
         // iterate through members of test class
         foreach (memberKey, memberValue in rootValue) {
-          // we need test* methods
+          // look for test* methods
           if (memberKey.len() >= 4 && memberKey.slice(0, 4) == "test") {
             // log test method execution
             this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::" + memberKey + "()"));
@@ -85,15 +88,22 @@ class ImpUnitRunner {
             this.tests++;
 
             // yield test method
-            yield [testInstance, memberValue.bindenv(testInstance)];
+            yield {
+              "case" : testCase,
+              "method" : memberValue.bindenv(testCase)
+            };
           }
+
         }
 
         // log tearDown() execution
         this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::tearDown()"));
 
         // yield tearDown method
-        yield [testInstance, testInstance.tearDown.bindenv(testInstance)];
+        yield {
+          "case" : testCase,
+          "method" : testCase.tearDown.bindenv(testCase)
+        };
       }
 
     }
@@ -122,7 +132,7 @@ class ImpUnitRunner {
    * @param {integer} assertions - # of assettions made
    * @private
    */
-  function _done(success, result, assertions) {
+  function _done(success, result, assertions = 0) {
       if (!success) {
         // log failure
         this.failures++;
@@ -143,84 +153,107 @@ class ImpUnitRunner {
       }
   }
 
+  function _now() {
+    return "hardware" in getroottable()
+      ? hardware.millis().tofloat() / 1000
+      : time();
+  }
+
   /**
    * Run tests
    * @private
    */
   function _run() {
 
-    local test = resume this.testFunctions;
+    local test = resume this._testsGenerator;
 
     if (test) {
-
-      local testInstance = test[0];
-      local testMethod = test[1];
-      local result = null;
-      local assertionsMade;
-
-      local syncSuccess = true;
-      local syncMessage = "";
 
       // do GC before each run
       collectgarbage();
 
+      test.assertions <- test["case"].assertions;
+      test.result <- null;
+
+      // record start time
+      test.startedAt <- this._now();
+
+      // run test method
       try {
-        assertionsMade = testInstance.assertions;
-        result = testMethod();
+        test.result = test.method();
       } catch (e) {
-
         // store sync test info
-        syncSuccess = false;
-        syncMessage = e;
-
+        test.error <- e;
       }
 
-      if (result instanceof Promise) {
+      // detect if test is async
+      test.async <- test.result instanceof Promise;
+
+      if (test.async) {
 
         // set the timeout timer
 
-        result.timerId = imp.wakeup(this.timeout, function () {
-          if (result._state == 0 /* pending*/) {
-            // set the timeout flag
-            result.timedOut = true;
+        test.timedOut <- false;
+
+        test.timerId <- imp.wakeup(this.timeout, function () {
+          if (test.result.isPending()) {
+            test.timedOut = true;
 
             // update assertions counter to ignore assertions afrer the timeout
-            assertionsMade = testInstance.assertions;
+            test.assertions = test["case"].assertions;
 
-            this._done(false, "Timed out after " + this.timeout + "s", 0);
+            this._done(false, "Test timed out after " + this.timeout + "s");
           }
         }.bindenv(this));
 
         // handle result
 
-        result
+        test.result
 
           // we're fine
           .then(function (message) {
-            if (!result.timedOut) {
-              this._done(true, message, testInstance.assertions - assertionsMade);
-            }
-          }.bindenv(this))
+            test.message <- message;
+          })
 
           // we're screwed
-          .fail(function (reason) {
-            if (!result.timedOut) {
-              this._done(false, reason, testInstance.assertions - assertionsMade);
-            }
-          }.bindenv(this))
+          .fail(function (error) {
+            test.error <- error;
+          })
 
           // anyways...
           .finally(function(e) {
+
             // cancel timeout detection
-            if (result.timerId) {
-              imp.cancelwakeup(result.timerId);
-              result.timerId = null;
+            if (test.timerId) {
+              imp.cancelwakeup(test.timerId);
+              test.timerId = null;
             }
-          });
+
+            if (!test.timedOut) {
+              if ("error" in test) {
+                this._done(false /* failure */, test.error, test["case"].assertions - test.assertions);
+              } else {
+                this._done(true /* success */, test.message, test["case"].assertions - test.assertions);
+              }
+            }
+
+          }.bindenv(this));
 
       } else {
-        // test was sync one
-        this._done(syncSuccess, syncMessage, testInstance.assertions - assertionsMade);
+        // check timeout
+
+        local testDuration = this._now() - test.startedAt;
+
+        if (testDuration > this.timeout) {
+          test.error <- "Test took " + testDuration + "s, longer than timeout of " + this.timeout + "s"
+        }
+
+        // test was sync
+        if ("error" in test) {
+          this._done(false /* failure */, test.error, test["case"].assertions - test.assertions);
+        } else {
+          this._done(true /* success */, test.result, test["case"].assertions - test.assertions);
+        }
       }
 
     } else {
