@@ -163,38 +163,35 @@ class ImpUnitRunner {
 
     if (test) {
 
-      local assertionsMade;
-
-      local testResult = {
-        result = null,
-        timerId = null,
-        timedOut = false
-      };
-
       // do GC before each run
       collectgarbage();
 
+      test.assertions <- test["case"].assertions;
+      test.result <- null;
+
+      // run test method
       try {
-        assertionsMade = test["case"].assertions;
-        testResult.result = test.method();
+        test.result = test.method();
       } catch (e) {
         // store sync test info
         test.error <- e;
       }
 
       // detect if test is async
-      test.async <- testResult.result instanceof Promise;
+      test.async <- test.result instanceof Promise;
 
       if (test.async) {
 
         // set the timeout timer
-        testResult.timerId = imp.wakeup(this.timeout, function () {
-          if (testResult.result.isPending()) {
-            // set the timeout flag
-            testResult.timedOut = true;
+
+        test.timedOut <- false;
+
+        test.timerId <- imp.wakeup(this.timeout, function () {
+          if (test.result.isPending()) {
+            test.timedOut = true;
 
             // update assertions counter to ignore assertions afrer the timeout
-            assertionsMade = test["case"].assertions;
+            test.assertions = test["case"].assertions;
 
             this._done(false, "Timed out after " + this.timeout + "s", 0);
           }
@@ -202,7 +199,7 @@ class ImpUnitRunner {
 
         // handle result
 
-        testResult.result
+        test.result
 
           // we're fine
           .then(function (message) {
@@ -218,16 +215,16 @@ class ImpUnitRunner {
           .finally(function(e) {
 
             // cancel timeout detection
-            if (testResult.timerId) {
-              imp.cancelwakeup(testResult.timerId);
-              testResult.timerId = null;
+            if (test.timerId) {
+              imp.cancelwakeup(test.timerId);
+              test.timerId = null;
             }
 
-            if (!testResult.timedOut) {
+            if (!test.timedOut) {
               if ("error" in test) {
-                this._done(false /* failure */, test.error, test["case"].assertions - assertionsMade);
+                this._done(false /* failure */, test.error, test["case"].assertions - test.assertions);
               } else {
-                this._done(true /* success */, test.message, test["case"].assertions - assertionsMade);
+                this._done(true /* success */, test.message, test["case"].assertions - test.assertions);
               }
             }
 
@@ -236,10 +233,12 @@ class ImpUnitRunner {
       } else {
         // test was sync
         if ("error" in test) {
-          this._done(false /* failure */, test.error, test["case"].assertions - assertionsMade);
+          this._done(false /* failure */, test.error, test["case"].assertions - test.assertions);
         } else {
-          this._done(true /* success */, testResult.result, test["case"].assertions - assertionsMade);
+          this._done(true /* success */, test.result, test["case"].assertions - test.assertions);
         }
+
+        server.log(JSONEncoder.encode(test));
       }
 
     } else {
