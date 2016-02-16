@@ -132,7 +132,7 @@ class ImpUnitRunner {
    * @param {integer} assertions - # of assettions made
    * @private
    */
-  function _done(success, result, assertions) {
+  function _done(success, result, assertions = 0) {
       if (!success) {
         // log failure
         this.failures++;
@@ -153,6 +153,12 @@ class ImpUnitRunner {
       }
   }
 
+  function _now() {
+    return "hardware" in getroottable()
+      ? hardware.millis().tofloat() / 1000
+      : time();
+  }
+
   /**
    * Run tests
    * @private
@@ -168,6 +174,9 @@ class ImpUnitRunner {
 
       test.assertions <- test["case"].assertions;
       test.result <- null;
+
+      // record start time
+      test.startedAt <- this._now();
 
       // run test method
       try {
@@ -193,7 +202,7 @@ class ImpUnitRunner {
             // update assertions counter to ignore assertions afrer the timeout
             test.assertions = test["case"].assertions;
 
-            this._done(false, "Timed out after " + this.timeout + "s", 0);
+            this._done(false, "Test timed out after " + this.timeout + "s");
           }
         }.bindenv(this));
 
@@ -231,14 +240,20 @@ class ImpUnitRunner {
           }.bindenv(this));
 
       } else {
+        // check timeout
+
+        local testDuration = this._now() - test.startedAt;
+
+        if (testDuration > this.timeout) {
+          test.error <- "Test took " + testDuration + "s, longer than timeout of " + this.timeout + "s"
+        }
+
         // test was sync
         if ("error" in test) {
           this._done(false /* failure */, test.error, test["case"].assertions - test.assertions);
         } else {
           this._done(true /* success */, test.result, test["case"].assertions - test.assertions);
         }
-
-        server.log(JSONEncoder.encode(test));
       }
 
     } else {
