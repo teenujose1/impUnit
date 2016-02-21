@@ -50,8 +50,10 @@ class ImpTestCase {
    */
   function assertDeepEqual(a, b, message = "At [%s]: expected \"%s\", got \"%s\"", path = "", level = 0) {
 
+    local cleanPath = @(p) p.len() == 0 ? p : p.slice(1);
+
     if (level > 32) {
-      throw "Possible cyclic reference at " + path.slice(1);
+      throw "Possible cyclic reference at " + cleanPath(path);
     }
 
     switch (type(a)) {
@@ -60,8 +62,14 @@ class ImpTestCase {
       case "array":
 
         foreach (k, v in a) {
-          local bVal = k in b ? b[k] : null;
-          this.assertDeepEqual(a[k], bVal, message, path + "." + k, level + 1);
+
+          path += "." + k;
+
+          if (!(k in b)) {
+            throw format("Missing slot [%s]", cleanPath(path));
+          }
+
+          this.assertDeepEqual(a[k], b[k], message, path, level + 1);
         }
 
         break;
@@ -71,7 +79,7 @@ class ImpTestCase {
 
       default:
         if (a != b) {
-          throw format(message, path.len() == 0 ? path : path.slice(1), a + "", b + "");
+          throw format(message, cleanPath(path), a + "", b + "");
         }
 
         break;
