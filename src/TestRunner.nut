@@ -69,14 +69,17 @@ class ImpUnitRunner {
         // create instance of the test class
         local testCase = rootValue();
 
-        // log setUp() execution
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::setUp()"));
+        // setUp()
+        if ("setUp" in testCase) {
+          // log setUp() execution
+          this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::setUp()"));
 
-        // yield setUp method
-        yield {
-          "case" : testCase,
-          "method" : testCase.setUp.bindenv(testCase)
-        };
+          // yield setUp method
+          yield {
+            "case" : testCase,
+            "method" : testCase.setUp.bindenv(testCase)
+          };
+        }
 
         // iterate through members of test class
         foreach (memberKey, memberValue in rootValue) {
@@ -96,14 +99,17 @@ class ImpUnitRunner {
 
         }
 
-        // log tearDown() execution
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::tearDown()"));
+        // tearDown()
+        if ("tearDown" in testCase) {
+          // log tearDown() execution
+          this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::tearDown()"));
 
-        // yield tearDown method
-        yield {
-          "case" : testCase,
-          "method" : testCase.tearDown.bindenv(testCase)
-        };
+          // yield tearDown method
+          yield {
+            "case" : testCase,
+            "method" : testCase.tearDown.bindenv(testCase)
+          };
+        }
       }
 
     }

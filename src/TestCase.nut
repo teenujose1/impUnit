@@ -43,19 +43,4 @@ class ImpTestCase {
     }
   }
 
-  /**
-   * Setup test case
-   * Can be async
-   * @return {Promise|*}
-   */
-  function setUp() {}
-
-  /**
-   * Teardown test case
-   * Can be async
-   * @return {Promise|*}
-   */
-  function tearDown() {
-  }
-
 }
