@@ -60,7 +60,8 @@ class ImpTestCase {
       case "array":
 
         foreach (k, v in a) {
-          this.assertDeepEqual(a[k], b[k], message, path + "." + k, level + 1);
+          local bVal = k in b ? b[k] : null;
+          this.assertDeepEqual(a[k], bVal, message, path + "." + k, level + 1);
         }
 
         break;
@@ -70,7 +71,7 @@ class ImpTestCase {
 
       default:
         if (a != b) {
-          throw format(message, path.len() == 0 ? path : path.slice(1), a.tostring(), b.tostring());
+          throw format(message, path.len() == 0 ? path : path.slice(1), a + "", b + "");
         }
 
         break;
