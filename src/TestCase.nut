@@ -11,10 +11,10 @@ class ImpTestCase {
    * @param {bool} condition
    * @param {string|false} message
    */
-  function assertTrue(condition, message = false) {
+  function assertTrue(condition, message = "Failed to assert that condition is true") {
     this.assertions++;
     if (!condition) {
-      throw message ? message : "Failed to assert that condition is true";
+      throw message;
     }
   }
 
@@ -23,10 +23,10 @@ class ImpTestCase {
    * @param {bool} condition
    * @param {string|false} message
    */
-   function assertEqual(expected, actual, message = false) {
+   function assertEqual(expected, actual, message = "Expected value: %s, got: %s") {
     this.assertions++;
     if (expected != actual) {
-      throw message ? message : "Expected value: " + expected + ", got: " + actual;
+      throw format(message, expected, actual);
     }
   }
 
@@ -35,11 +35,10 @@ class ImpTestCase {
    * @param {bool} condition
    * @param {string|false} message
    */
-  function assertClose(expected, actual, maxDiff, message = false) {
+  function assertClose(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
     this.assertions++;
     if (math.abs(expected - actual) > maxDiff) {
-      throw message ? message :
-        "Expected value: " + expected + "±" + maxDiff + ", got: " + actual;
+      throw format(message, expected, maxDiff, actual);
     }
   }
 
