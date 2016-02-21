@@ -2,7 +2,7 @@
  * impUnit Test Framework
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 0.1.0-rc1
+ * @version 0.1.0-rc2
  * @package ImpUnit
  */
 
