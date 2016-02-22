@@ -11,10 +11,10 @@ class ImpTestCase {
    * @param {bool} condition
    * @param {string|false} message
    */
-  function assertTrue(condition, message = false) {
+  function assertTrue(condition, message = "Failed to assert that condition is true") {
     this.assertions++;
     if (!condition) {
-      throw message ? message : "Failed to assert that condition is true";
+      throw message;
     }
   }
 
@@ -23,10 +23,10 @@ class ImpTestCase {
    * @param {bool} condition
    * @param {string|false} message
    */
-   function assertEqual(expected, actual, message = false) {
+   function assertEqual(expected, actual, message = "Expected value: %s, got: %s") {
     this.assertions++;
     if (expected != actual) {
-      throw message ? message : "Expected value: " + expected + ", got: " + actual;
+      throw format(message, expected, actual);
     }
   }
 
@@ -35,12 +35,56 @@ class ImpTestCase {
    * @param {bool} condition
    * @param {string|false} message
    */
-  function assertClose(expected, actual, maxDiff, message = false) {
+  function assertClose(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
     this.assertions++;
     if (math.abs(expected - actual) > maxDiff) {
-      throw message ? message :
-        "Expected value: " + expected + "±" + maxDiff + ", got: " + actual;
+      throw format(message, expected, maxDiff, actual);
     }
   }
+
+  /**
+   * Perform a deep comparison of two values
+   * Useful for comparing arrays or tables
+   * @param {*} a
+   * @param {*} b
+   */
+  function assertDeepEqual(a, b, message = "At [%s]: expected \"%s\", got \"%s\"", path = "", level = 0) {
+
+    local cleanPath = @(p) p.len() == 0 ? p : p.slice(1);
+
+    if (level > 32) {
+      throw "Possible cyclic reference at " + cleanPath(path);
+    }
+
+    switch (type(a)) {
+      case "table":
+      case "class":
+      case "array":
+
+        foreach (k, v in a) {
+
+          path += "." + k;
+
+          if (!(k in b)) {
+            throw format("Missing slot [%s]", cleanPath(path));
+          }
+
+          this.assertDeepEqual(a[k], b[k], message, path, level + 1);
+        }
+
+        break;
+
+      case "null":
+        break;
+
+      default:
+        if (a != b) {
+          throw format(message, cleanPath(path), a + "", b + "");
+        }
+
+        break;
+    }
+  }
+
 
 }
