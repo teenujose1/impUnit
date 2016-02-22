@@ -11,7 +11,7 @@
 
 Unit Testing Framework for EI/Squirrel.
 
-_Version: 0.1.0-rc2_
+_Version: 0.1.0_
 
 ## License
 
