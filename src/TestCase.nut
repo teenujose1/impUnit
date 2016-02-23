@@ -26,7 +26,7 @@ class ImpTestCase {
    function assertEqual(expected, actual, message = "Expected value: %s, got: %s") {
     this.assertions++;
     if (expected != actual) {
-      throw format(message, expected, actual);
+      throw format(message, expected + "", actual + "");
     }
   }
 
@@ -38,7 +38,7 @@ class ImpTestCase {
   function assertClose(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
     this.assertions++;
     if (math.abs(expected - actual) > maxDiff) {
-      throw format(message, expected, maxDiff, actual);
+      throw format(message, expected + "", maxDiff + "", actual + "");
     }
   }
 
