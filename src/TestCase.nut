@@ -50,6 +50,10 @@ class ImpTestCase {
    */
   function assertDeepEqual(a, b, message = "At [%s]: expected \"%s\", got \"%s\"", path = "", level = 0) {
 
+    if (0 == level) {
+      this.assertions++;
+    }
+
     local cleanPath = @(p) p.len() == 0 ? p : p.slice(1);
 
     if (level > 32) {
