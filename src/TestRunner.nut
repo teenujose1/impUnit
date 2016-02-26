@@ -73,11 +73,15 @@ class ImpUnitRunner {
           tests = []
         };
 
+        // find test methoids
         foreach (memberKey, memberValue in testCaseClass) {
           if (memberKey.len() >= 4 && memberKey.slice(0, 4) == "test") {
             testCases[testCaseName].tests.push(memberKey);
           }
         }
+
+        // sort test methods
+        testCases[testCaseName].tests.sort();
       }
     }
 
