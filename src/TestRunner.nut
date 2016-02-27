@@ -113,6 +113,7 @@ class ImpUnitRunner {
       }
 
       for (local i = 0; i < testCase.tests.len(); i++) {
+        this.tests++;
         this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::" +  testCase.tests[i] + "()"));
         yield {
           "case" : testCaseInstance,
