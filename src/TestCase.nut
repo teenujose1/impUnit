@@ -9,7 +9,7 @@ class ImpTestCase {
   /**
    * Assert that something is true
    * @param {bool} condition
-   * @param {string|false} message
+   * @param {string} message
    */
   function assertTrue(condition, message = "Failed to assert that condition is true") {
     this.assertions++;
@@ -21,7 +21,7 @@ class ImpTestCase {
   /**
    * Assert that two values are equal
    * @param {bool} condition
-   * @param {string|false} message
+   * @param {string} message
    */
    function assertEqual(expected, actual, message = "Expected value: %s, got: %s") {
     this.assertions++;
@@ -31,9 +31,35 @@ class ImpTestCase {
   }
 
   /**
+   * Assert that value is greater than something
+   * @param {number|*} actual
+   * @param {number|*} cmp
+   * @param {string} message
+   */
+   function assertGreater(actual, cmp, message = "Failed to assert that %s > %s") {
+    this.assertions++;
+    if (actual <= cmp) {
+      throw format(message, actual + "", cmp + "");
+    }
+  }
+
+  /**
+   * Assert that value is less than something
+   * @param {number|*} actual
+   * @param {number|*} cmp
+   * @param {string} message
+   */
+   function assertLess(actual, cmp, message = "Failed to assert that %s < %s") {
+    this.assertions++;
+    if (actual >= cmp) {
+      throw format(message, actual + "", cmp + "");
+    }
+  }
+
+  /**
    * Assert that two values are within a certain range
    * @param {bool} condition
-   * @param {string|false} message
+   * @param {string} message
    */
   function assertClose(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
     this.assertions++;
@@ -47,6 +73,7 @@ class ImpTestCase {
    * Useful for comparing arrays or tables
    * @param {*} expected
    * @param {*} actual
+   * @param {string} message
    */
   function assertDeepEqual(expected, actual, message = "At [%s]: expected \"%s\", got \"%s\"", path = "", level = 0) {
 
