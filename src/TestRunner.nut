@@ -281,7 +281,5 @@ class ImpUnitRunner {
     } else {
       this._finish();
     }
-
   }
-
 }
