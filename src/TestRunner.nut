@@ -34,7 +34,7 @@ class ImpUnitRunner {
    */
   function run() {
     this._log(ImpUnitMessage(ImpUnitMessageTypes.sessionStart))
-    this._testsGenerator = this._findTests();
+    this._testsGenerator = this._createTestsGenerator();
     this._run();
   }
 
@@ -55,66 +55,82 @@ class ImpUnitRunner {
   }
 
   /**
-   * Loog for test cases/test functions
-   * @returns {generator}
-   * @private
+   * Find test cases and methods
    */
   function _findTests() {
 
-    // iterate through the
-    foreach (rootKey, rootValue in getroottable()) {
+    local testCases = {};
 
+    foreach (rootKey, rootValue in getroottable()) {
       if (type(rootValue) == "class" && rootValue.getbase() == ImpTestCase) {
 
-        // create instance of the test class
-        local testCase = rootValue();
+        local testCaseName = rootKey;
+        local testCaseClass = rootValue;
 
-        // setUp()
-        if ("setUp" in testCase) {
-          // log setUp() execution
-          this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::setUp()"));
+        testCases[testCaseName] <- {
+          setUp = ("setUp" in testCaseClass),
+          tearDown = ("tearDown" in testCaseClass),
+          tests = []
+        };
 
-          // yield setUp method
-          yield {
-            "case" : testCase,
-            "method" : testCase.setUp.bindenv(testCase)
-          };
-        }
-
-        // iterate through members of test class
-        foreach (memberKey, memberValue in rootValue) {
-          // look for test* methods
+        // find test methoids
+        foreach (memberKey, memberValue in testCaseClass) {
           if (memberKey.len() >= 4 && memberKey.slice(0, 4) == "test") {
-            // log test method execution
-            this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::" + memberKey + "()"));
-
-            this.tests++;
-
-            // yield test method
-            yield {
-              "case" : testCase,
-              "method" : memberValue.bindenv(testCase)
-            };
+            testCases[testCaseName].tests.push(memberKey);
           }
-
         }
 
-        // tearDown()
-        if ("tearDown" in testCase) {
-          // log tearDown() execution
-          this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, rootKey + "::tearDown()"));
-
-          // yield tearDown method
-          yield {
-            "case" : testCase,
-            "method" : testCase.tearDown.bindenv(testCase)
-          };
-        }
+        // sort test methods
+        testCases[testCaseName].tests.sort();
       }
-
     }
 
-    // we're done
+    // [debug]
+    this._log(ImpUnitMessage(ImpUnitMessageTypes.debug, {"testCasesFound": testCases}));
+
+    return testCases;
+  }
+
+  /**
+   * Create a generator that yields tests (test methods)
+   * @return {Generator}
+   * @private
+   */
+  function _createTestsGenerator() {
+
+    local testCases = this._findTests();
+
+    foreach (testCaseName, testCase in testCases) {
+
+      local testCaseInstance = getroottable()[testCaseName]();
+      testCaseInstance.session = this.session;
+
+      if (testCase.setUp) {
+        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::setUp()"));
+        yield {
+          "case" : testCaseInstance,
+          "method" : testCaseInstance.setUp.bindenv(testCaseInstance)
+        };
+      }
+
+      for (local i = 0; i < testCase.tests.len(); i++) {
+        this.tests++;
+        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::" +  testCase.tests[i] + "()"));
+        yield {
+          "case" : testCaseInstance,
+          "method" : testCaseInstance[testCase.tests[i]].bindenv(testCaseInstance)
+        };
+      }
+
+      if (testCase.tearDown) {
+        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::tearDown()"));
+        yield {
+          "case" : testCaseInstance,
+          "method" : testCaseInstance.tearDown.bindenv(testCaseInstance)
+        };
+      }
+    }
+
     return null;
   }
 
@@ -265,7 +281,5 @@ class ImpUnitRunner {
     } else {
       this._finish();
     }
-
   }
-
 }
