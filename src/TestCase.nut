@@ -70,7 +70,7 @@ class ImpTestCase {
           path += "." + k;
 
           if (!(k in actual)) {
-            throw format("Missing slot [%s]", cleanPath(path));
+            throw format("Missing slot [%s] in actual value", cleanPath(path));
           }
 
           this.assertDeepEqual(expected[k], actual[k], message, path, level + 1);
