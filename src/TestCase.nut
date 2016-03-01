@@ -110,4 +110,25 @@ class ImpTestCase {
       throw format(message, min + "", max + "", actual + "");
     }
   }
+
+  /**
+   * Assert that function throws an erorr
+   * @param {function} fn
+   * @param {table|userdata|class|instance|meta} ctx
+   * @param {array} args - arguments for the function
+   * @param {string} message
+   * @return {error} error thrown by function
+   */
+  function assertThrowsError(fn, ctx, args = [], message = "Function was expected to throw an error") {
+    this.assertions++;
+    args.insert(0, ctx)
+
+    try {
+      fn.pacall(args);
+    } catch (e) {
+      return e;
+    }
+
+    throw message;
+  }
 }
