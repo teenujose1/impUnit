@@ -103,6 +103,7 @@ class ImpUnitRunner {
     foreach (testCaseName, testCase in testCases) {
 
       local testCaseInstance = getroottable()[testCaseName]();
+      testCaseInstance.session = this.session;
 
       if (testCase.setUp) {
         this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::setUp()"));

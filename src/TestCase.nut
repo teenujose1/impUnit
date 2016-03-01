@@ -4,6 +4,7 @@
  */
 class ImpTestCase {
 
+  session = null; // session name
   assertions = 0;
 
   /**
