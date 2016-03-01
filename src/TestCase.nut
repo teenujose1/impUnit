@@ -45,10 +45,10 @@ class ImpTestCase {
   /**
    * Perform a deep comparison of two values
    * Useful for comparing arrays or tables
-   * @param {*} a
-   * @param {*} b
+   * @param {*} expected
+   * @param {*} actual
    */
-  function assertDeepEqual(a, b, message = "At [%s]: expected \"%s\", got \"%s\"", path = "", level = 0) {
+  function assertDeepEqual(expected, actual, message = "At [%s]: expected \"%s\", got \"%s\"", path = "", level = 0) {
 
     if (0 == level) {
       this.assertions++;
@@ -60,20 +60,20 @@ class ImpTestCase {
       throw "Possible cyclic reference at " + cleanPath(path);
     }
 
-    switch (type(a)) {
+    switch (type(actual)) {
       case "table":
       case "class":
       case "array":
 
-        foreach (k, v in a) {
+        foreach (k, v in expected) {
 
           path += "." + k;
 
-          if (!(k in b)) {
+          if (!(k in actual)) {
             throw format("Missing slot [%s]", cleanPath(path));
           }
 
-          this.assertDeepEqual(a[k], b[k], message, path, level + 1);
+          this.assertDeepEqual(expected[k], actual[k], message, path, level + 1);
         }
 
         break;
@@ -82,8 +82,8 @@ class ImpTestCase {
         break;
 
       default:
-        if (a != b) {
-          throw format(message, cleanPath(path), a + "", b + "");
+        if (expected != actual) {
+          throw format(message, cleanPath(path), expected + "", actual + "");
         }
 
         break;
