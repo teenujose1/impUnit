@@ -90,5 +90,24 @@ class ImpTestCase {
     }
   }
 
+  /**
+   * Assert that the value is between min amd max
+   * @param {number|*} actual
+   * @param {number|*} min
+   * @param {number|*} max
+   */
+  function assertBetween(actual, min, max, message = "Expected value the range of %s..%s, got %s") {
+    this.assertions++;
 
+    // swap min/max if min > max
+    if (min > max) {
+      local t = max;
+      max = min;
+      min = t;
+    }
+
+    if (actual < min || actual > max) {
+      throw format(message, min + "", max + "", actual + "");
+    }
+  }
 }
