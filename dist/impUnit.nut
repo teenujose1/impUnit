@@ -532,7 +532,7 @@ class ImpTestCase {
    * @param {number|*} min
    * @param {number|*} max
    */
-  function assertBetween(actual, min, max, message = "Expected value the range of %s..%s, got %s") {
+  function assertBetween(actual, min, max, message = "Expected value in the range of %s..%s, got %s") {
     this.assertions++;
 
     // swap min/max if min > max
