@@ -33,7 +33,7 @@ class ImpUnitRunner {
    * Run tests
    */
   function run() {
-    this._log(ImpUnitMessage(ImpUnitMessageTypes.sessionStart))
+    this.log(ImpUnitMessage(ImpUnitMessageTypes.sessionStart))
     this._testsGenerator = this._createTestsGenerator();
     this._run();
   }
@@ -43,7 +43,7 @@ class ImpUnitRunner {
    * @param {ImpUnitMessage} message
    * @private
    */
-  function _log(message) {
+  function log(message) {
     // set session id
     message.session = this.session;
 
@@ -86,7 +86,7 @@ class ImpUnitRunner {
     }
 
     // [debug]
-    this._log(ImpUnitMessage(ImpUnitMessageTypes.debug, {"testCasesFound": testCases}));
+    this.log(ImpUnitMessage(ImpUnitMessageTypes.debug, {"testCasesFound": testCases}));
 
     return testCases;
   }
@@ -106,7 +106,7 @@ class ImpUnitRunner {
       testCaseInstance.session = this.session;
 
       if (testCase.setUp) {
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::setUp()"));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::setUp()"));
         yield {
           "case" : testCaseInstance,
           "method" : testCaseInstance.setUp.bindenv(testCaseInstance)
@@ -115,7 +115,7 @@ class ImpUnitRunner {
 
       for (local i = 0; i < testCase.tests.len(); i++) {
         this.tests++;
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::" +  testCase.tests[i] + "()"));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::" +  testCase.tests[i] + "()"));
         yield {
           "case" : testCaseInstance,
           "method" : testCaseInstance[testCase.tests[i]].bindenv(testCaseInstance)
@@ -123,7 +123,7 @@ class ImpUnitRunner {
       }
 
       if (testCase.tearDown) {
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::tearDown()"));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::tearDown()"));
         yield {
           "case" : testCaseInstance,
           "method" : testCaseInstance.tearDown.bindenv(testCaseInstance)
@@ -140,7 +140,7 @@ class ImpUnitRunner {
    */
   function _finish() {
     // log result message
-    this._log(ImpUnitMessage(ImpUnitMessageTypes.sessionResult, {
+    this.log(ImpUnitMessage(ImpUnitMessageTypes.sessionResult, {
       tests = this.tests,
       assertions = this.assertions,
       failures = this.failures
@@ -158,10 +158,10 @@ class ImpUnitRunner {
       if (!success) {
         // log failure
         this.failures++;
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testFail, result));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testFail, result));
       } else {
         // log test method success
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testOk, result));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testOk, result));
       }
 
       // update assertions number
