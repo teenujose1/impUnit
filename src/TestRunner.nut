@@ -104,6 +104,7 @@ class ImpUnitRunner {
 
       local testCaseInstance = getroottable()[testCaseName]();
       testCaseInstance.session = this.session;
+      testCaseInstance.runner = this;
 
       if (testCase.setUp) {
         this.log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::setUp()"));

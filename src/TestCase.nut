@@ -4,6 +4,7 @@
  */
 class ImpTestCase {
 
+  runner = null; // runner instance
   session = null; // session name
   assertions = 0;
 
