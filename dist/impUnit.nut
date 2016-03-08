@@ -2,7 +2,7 @@
  * impUnit Test Framework
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 0.2.0
+ * @version 0.3.0
  * @package ImpUnit
  */
 
@@ -362,7 +362,8 @@ enum ImpUnitMessageTypes {
   testOk = "TEST_OK", // test success
   testFail = "TEST_FAIL", // test failure
   sessionResult = "SESSION_RESULT", // session result
-  debug = "DEBUG" // debug message
+  debug = "DEBUG", // debug message
+  externalCommand = "EXTERNAL_COMMAND" // external command
 }
 
 /**
@@ -412,8 +413,21 @@ class ImpUnitMessage {
  */
 class ImpTestCase {
 
+  runner = null; // runner instance
   session = null; // session name
   assertions = 0;
+
+  /**
+   * Send message to impTest to execute external command
+   * @param {string} command
+   */
+  function runCommand(command = "") {
+    this.runner.log(
+        ImpUnitMessage(ImpUnitMessageTypes.externalCommand, {
+          "command": command
+        })
+    );
+  }
 
   /**
    * Assert that something is true
@@ -603,7 +617,7 @@ class ImpUnitRunner {
    * Run tests
    */
   function run() {
-    this._log(ImpUnitMessage(ImpUnitMessageTypes.sessionStart))
+    this.log(ImpUnitMessage(ImpUnitMessageTypes.sessionStart))
     this._testsGenerator = this._createTestsGenerator();
     this._run();
   }
@@ -613,7 +627,7 @@ class ImpUnitRunner {
    * @param {ImpUnitMessage} message
    * @private
    */
-  function _log(message) {
+  function log(message) {
     // set session id
     message.session = this.session;
 
@@ -656,7 +670,7 @@ class ImpUnitRunner {
     }
 
     // [debug]
-    this._log(ImpUnitMessage(ImpUnitMessageTypes.debug, {"testCasesFound": testCases}));
+    this.log(ImpUnitMessage(ImpUnitMessageTypes.debug, {"testCasesFound": testCases}));
 
     return testCases;
   }
@@ -674,9 +688,10 @@ class ImpUnitRunner {
 
       local testCaseInstance = getroottable()[testCaseName]();
       testCaseInstance.session = this.session;
+      testCaseInstance.runner = this;
 
       if (testCase.setUp) {
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::setUp()"));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::setUp()"));
         yield {
           "case" : testCaseInstance,
           "method" : testCaseInstance.setUp.bindenv(testCaseInstance)
@@ -685,7 +700,7 @@ class ImpUnitRunner {
 
       for (local i = 0; i < testCase.tests.len(); i++) {
         this.tests++;
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::" +  testCase.tests[i] + "()"));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::" +  testCase.tests[i] + "()"));
         yield {
           "case" : testCaseInstance,
           "method" : testCaseInstance[testCase.tests[i]].bindenv(testCaseInstance)
@@ -693,7 +708,7 @@ class ImpUnitRunner {
       }
 
       if (testCase.tearDown) {
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::tearDown()"));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testStart, testCaseName + "::tearDown()"));
         yield {
           "case" : testCaseInstance,
           "method" : testCaseInstance.tearDown.bindenv(testCaseInstance)
@@ -710,7 +725,7 @@ class ImpUnitRunner {
    */
   function _finish() {
     // log result message
-    this._log(ImpUnitMessage(ImpUnitMessageTypes.sessionResult, {
+    this.log(ImpUnitMessage(ImpUnitMessageTypes.sessionResult, {
       tests = this.tests,
       assertions = this.assertions,
       failures = this.failures
@@ -728,10 +743,10 @@ class ImpUnitRunner {
       if (!success) {
         // log failure
         this.failures++;
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testFail, result));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testFail, result));
       } else {
         // log test method success
-        this._log(ImpUnitMessage(ImpUnitMessageTypes.testOk, result));
+        this.log(ImpUnitMessage(ImpUnitMessageTypes.testOk, result));
       }
 
       // update assertions number
