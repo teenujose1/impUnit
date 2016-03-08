@@ -12,7 +12,7 @@ class ImpTestCase {
    * Send message to impTest to execute external command
    * @param {string} command
    */
-  function externalCommand(command = "") {
+  function runCommand(command = "") {
     this.runner.log(
         ImpUnitMessage(ImpUnitMessageTypes.externalCommand, {
           "command": command
