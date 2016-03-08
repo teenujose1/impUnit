@@ -16,7 +16,7 @@ class ImpTestCase {
     this.runner.log(
         ImpUnitMessage(ImpUnitMessageTypes.externalCommand, {
           "command": command
-        });
+        })
     );
   }
 
