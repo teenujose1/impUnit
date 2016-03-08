@@ -10,7 +10,8 @@ enum ImpUnitMessageTypes {
   testOk = "TEST_OK", // test success
   testFail = "TEST_FAIL", // test failure
   sessionResult = "SESSION_RESULT", // session result
-  debug = "DEBUG" // debug message
+  debug = "DEBUG", // debug message
+  externalCommand = "EXTERNAL_COMMAND" // external command
 }
 
 /**

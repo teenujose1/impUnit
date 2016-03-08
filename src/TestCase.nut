@@ -4,8 +4,21 @@
  */
 class ImpTestCase {
 
+  runner = null; // runner instance
   session = null; // session name
   assertions = 0;
+
+  /**
+   * Send message to impTest to execute external command
+   * @param {string} command
+   */
+  function externalCommand(command = "") {
+    this.runner.log(
+        ImpUnitMessage(ImpUnitMessageTypes.externalCommand, {
+          "command": command
+        })
+    );
+  }
 
   /**
    * Assert that something is true
