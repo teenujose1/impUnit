@@ -10,7 +10,7 @@
 function __module_ImpUnit_JSONEncoder() {
   local exports = class {
 
-    static version = [0, 4, 0];
+    static version = [0, 4, 0, "impUnit"];
 
     // max structure depth
     // anything above probably has a cyclic ref

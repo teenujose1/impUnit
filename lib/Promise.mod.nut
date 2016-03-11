@@ -16,12 +16,9 @@
  *   - isPendinng()
  */
 function __module_ImpUnit_Promise() {
+  local exports = class {
 
-  local exports = {};
-
-  exports = class {
-
-      static version = [1, 1, 0];
+      static version = [1, 1, 0, "impUnit"];
 
       _state = null;
       _value = null;
