@@ -3,8 +3,11 @@
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
  * @verion 0.4.0-impUnit
+ *
+ *  impUnit chages:
+ *   - packaging as module
  */
-function __module_impUnit_JSONEncoder() {
+function __module_ImpUnit_JSONEncoder() {
   local exports = class {
 
     static version = [0, 4, 0];
