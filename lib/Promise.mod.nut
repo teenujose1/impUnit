@@ -13,6 +13,7 @@
  *
  *  impUnit chages:
  *   - packaging as module
+ *   - isPendinng()
  */
 function __module_ImpUnit_Promise() {
 
@@ -158,6 +159,12 @@ function __module_ImpUnit_Promise() {
        */
       function finally(always = null) {
         return then(always, always);
+      }
+
+      // impUnit additions
+
+      function isPending() {
+        return this._state == PROMISE_STATE_PENDING;
       }
   }
 
