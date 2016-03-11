@@ -1,9 +1,4 @@
 /**
- * This file is licensed under the MIT License
- * http://opensource.org/licenses/MIT
- */
-
-/**
  * Promise class for Squirrel (Electric Imp)
  * This file is licensed under the MIT License
  *
@@ -15,8 +10,11 @@
  * @author Aron Steg
  * @author Mikhail Yurasov <mikhail@electricimp.com>
  * @version 1.1.0-impUnit
+ *
+ *  impUnit chages:
+ *   - packaging as module
  */
-function __module_impUnit_Promise() {
+function __module_ImpUnit_Promise() {
 
   local exports = {};
 
