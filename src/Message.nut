@@ -4,7 +4,7 @@
  */
 
 // message types
-enum ImpUnitMessageTypes {
+local ImpUnitMessageTypes = {
   sessionStart = "SESSION_START", // session start
   testStart = "TEST_START", // test start
   testOk = "TEST_OK", // test success
@@ -17,7 +17,7 @@ enum ImpUnitMessageTypes {
 /**
  * Test message
  */
-class ImpUnitMessage {
+local ImpUnitMessage = class {
 
   type = "";
   message = "";

@@ -8,4 +8,13 @@
 
 // #include "lib/JSONEncoder.class.nut"
 // #include "lib/Promise.class.nut"
+// impUnit module
+
+function __module_impUnit(Promise, JSONEncoder) {
 // #include "src/ImpUnit.nut"
+  // export symbols
+  return {
+    "ImpTestCase" : ImpTestCase,
+    "ImpUnitRunner" : ImpUnitRunner
+  }
+}

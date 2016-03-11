@@ -3,18 +3,10 @@
  * @package ImpUnit
  */
 
-// extend Promise for our needs
-// don't do this at home
-class Promise extends Promise {
-  function isPending() {
-    return this._state == 0;
-  }
-}
-
 /**
  * Imp test runner
  */
-class ImpUnitRunner {
+local ImpUnitRunner = class {
 
   // options
   timeout = 2;
