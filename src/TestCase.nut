@@ -2,7 +2,7 @@
  * Base for test cases
  * @package ImpUnit
  */
-class ImpTestCase {
+local ImpTestCase = class {
 
   runner = null; // runner instance
   session = null; // session name
