@@ -2,7 +2,7 @@
  * impUnit Test Framework
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 0.3.0
+ * @version 0.4.1
  * @package ImpUnit
  */
 
@@ -371,7 +371,6 @@ function __module_ImpUnit_Promise() {
 }
 
 // impUnit module
-
 function __module_impUnit(Promise, JSONEncoder) {
 /**
  * Message handling
@@ -890,17 +889,13 @@ local ImpUnitRunner = class {
   }
 }
 
-// impUnit bootstrapping
-
 // resolve modules
 __module_ImpUnit_Promise_exports <- __module_ImpUnit_Promise();
 __module_ImpUnit_JSONEncoder_exports <- __module_ImpUnit_JSONEncoder();
 __module_impUnit_exports <- __module_impUnit(__module_ImpUnit_Promise_exports, __module_ImpUnit_JSONEncoder_exports);
 
-// add symbols from __module_impUnit to ::
+// add symbols to root scope for old-scool usage
+Promise <- __module_ImpUnit_Promise_exports;
 ImpTestCase <- __module_impUnit_exports.ImpTestCase;
 ImpUnitRunner <- __module_impUnit_exports.ImpUnitRunner;
-
-// add Promise to ::
-Promise <- __module_ImpUnit_Promise_exports;
 
