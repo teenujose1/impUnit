@@ -2,7 +2,7 @@
  * impUnit Test Framework
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 0.3.0
+ * @version 0.4.0
  * @package ImpUnit
  */
 
@@ -34,5 +34,5 @@ __module_impUnit_exports <- __module_impUnit(__module_ImpUnit_Promise_exports, _
 ImpTestCase <- __module_impUnit_exports.ImpTestCase;
 ImpUnitRunner <- __module_impUnit_exports.ImpUnitRunner;
 
-// add Promise to ::
+// add Promise to :: (for test in global scope)
 Promise <- __module_ImpUnit_Promise_exports;
