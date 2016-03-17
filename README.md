@@ -11,8 +11,6 @@
 
 Unit Testing Framework for EI/Squirrel.
 
-_Version: 0.4.2_
-
 ## License
 
 The code in this repository is licensed under [MIT License](./LICENSE).
