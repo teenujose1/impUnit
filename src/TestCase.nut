@@ -122,7 +122,7 @@ local ImpTestCase = class {
 
       default:
         if (value2 != value1) {
-          throw format(message, cleanPath(path), value2 + "", value1 + "");
+          throw format(message, cleanPath(path), value1 + "", value2 + "");
         }
 
         break;
