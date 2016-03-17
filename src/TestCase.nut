@@ -104,16 +104,15 @@ local ImpTestCase = class {
       case "class":
       case "array":
 
-        foreach (k, v in value2) {
-
+        foreach (k, v in value1) {
           path += "." + k;
 
-          if (!(k in value1)) {
+          if (!(k in value2)) {
             throw format("%s slot [%s] in actual value",
               isForwardPass ? "Missing" : "Extra", cleanPath(path));
           }
 
-          this._assertDeepEqual(value2[k], value1[k], message, isForwardPass, path, level + 1);
+          this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
         }
 
         break;
