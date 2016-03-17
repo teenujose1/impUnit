@@ -2,7 +2,7 @@
  * impUnit Test Framework
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 0.4.1
+ * @version 0.4.2
  * @package ImpUnit
  */
 
@@ -515,37 +515,36 @@ local ImpTestCase = class {
 
   /**
    * Perform a deep comparison of two values
-   * Useful for comparing arrays or tables
-   * @param {*} expected
-   * @param {*} actual
+   * @param {*} value1
+   * @param {*} value2
    * @param {string} message
+   * @param {boolean} isForwardPass - on forward pass value1 is treated "expected", value2 as "actual" and vice-versa on backward pass
+   * @param {string} path - current slot path
+   * @param {int} level - current depth level
+   * @private
    */
-  function assertDeepEqual(expected, actual, message = "At [%s]: expected \"%s\", got \"%s\"", path = "", level = 0) {
-
-    if (0 == level) {
-      this.assertions++;
-    }
-
+  function _assertDeepEqual(value1, value2, message, isForwardPass, path = "", level = 0) {
     local cleanPath = @(p) p.len() == 0 ? p : p.slice(1);
 
     if (level > 32) {
       throw "Possible cyclic reference at " + cleanPath(path);
     }
 
-    switch (type(actual)) {
+    switch (type(value1)) {
       case "table":
       case "class":
       case "array":
 
-        foreach (k, v in expected) {
+        foreach (k, v in value2) {
 
           path += "." + k;
 
-          if (!(k in actual)) {
-            throw format("Missing slot [%s] in actual value", cleanPath(path));
+          if (!(k in value1)) {
+            throw format("%s slot [%s] in actual value",
+              isForwardPass ? "Missing" : "Extra", cleanPath(path));
           }
 
-          this.assertDeepEqual(expected[k], actual[k], message, path, level + 1);
+          this._assertDeepEqual(value2[k], value1[k], message, isForwardPass, path, level + 1);
         }
 
         break;
@@ -554,12 +553,25 @@ local ImpTestCase = class {
         break;
 
       default:
-        if (expected != actual) {
-          throw format(message, cleanPath(path), expected + "", actual + "");
+        if (value2 != value1) {
+          throw format(message, cleanPath(path), value2 + "", value1 + "");
         }
 
         break;
     }
+  }
+
+  /**
+   * Perform a deep comparison of two values
+   * Useful for comparing arrays or tables
+   * @param {*} expected
+   * @param {*} actual
+   * @param {string} message
+   */
+  function assertDeepEqual(expected, actual, message = "At [%s]: expected \"%s\", got \"%s\"") {
+    this.assertions++;
+    this._assertDeepEqual(expected, actual, message, true); // forward pass
+    this._assertDeepEqual(actual, expected, message, false); // backwards pass
   }
 
   /**
