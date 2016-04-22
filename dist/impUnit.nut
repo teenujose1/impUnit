@@ -2,7 +2,7 @@
  * impUnit Test Framework
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 0.4.3
+ * @version 0.5.0
  * @package ImpUnit
  */
 
@@ -379,12 +379,13 @@ function __module_impUnit(Promise, JSONEncoder) {
 
 // message types
 local ImpUnitMessageTypes = {
-  sessionStart = "SESSION_START", // session start
-  testStart = "TEST_START", // test start
+  info = "INFO", // info message
+  debug = "DEBUG", // debug message
   testOk = "TEST_OK", // test success
   testFail = "TEST_FAIL", // test failure
+  testStart = "TEST_START", // test start
+  sessionStart = "SESSION_START", // session start
   sessionResult = "SESSION_RESULT", // session result
-  debug = "DEBUG", // debug message
   externalCommand = "EXTERNAL_COMMAND" // external command
 }
 
@@ -392,6 +393,8 @@ local ImpUnitMessageTypes = {
  * Test message
  */
 local ImpUnitMessage = class {
+
+  static version = [0, 5, 0];
 
   type = "";
   message = "";
@@ -435,6 +438,8 @@ local ImpUnitMessage = class {
  */
 local ImpTestCase = class {
 
+  static version = [0, 5, 0];
+
   runner = null; // runner instance
   session = null; // session name
   assertions = 0;
@@ -447,6 +452,18 @@ local ImpTestCase = class {
     this.runner.log(
         ImpUnitMessage(ImpUnitMessageTypes.externalCommand, {
           "command": command
+        })
+    );
+  }
+
+  /**
+   * Output an info message
+   * @param {*=""} message
+   */
+  function info(message = "") {
+    this.runner.log(
+        ImpUnitMessage(ImpUnitMessageTypes.info, {
+          "message": message
         })
     );
   }
@@ -624,6 +641,8 @@ local ImpTestCase = class {
  * Imp test runner
  */
 local ImpUnitRunner = class {
+
+  static version = [0, 5, 0];
 
   // options
   timeout = 2;

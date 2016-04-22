@@ -5,12 +5,13 @@
 
 // message types
 local ImpUnitMessageTypes = {
-  sessionStart = "SESSION_START", // session start
-  testStart = "TEST_START", // test start
+  info = "INFO", // info message
+  debug = "DEBUG", // debug message
   testOk = "TEST_OK", // test success
   testFail = "TEST_FAIL", // test failure
+  testStart = "TEST_START", // test start
+  sessionStart = "SESSION_START", // session start
   sessionResult = "SESSION_RESULT", // session result
-  debug = "DEBUG", // debug message
   externalCommand = "EXTERNAL_COMMAND" // external command
 }
 
@@ -18,6 +19,8 @@ local ImpUnitMessageTypes = {
  * Test message
  */
 local ImpUnitMessage = class {
+
+  static version = [0, 5, 0];
 
   type = "";
   message = "";

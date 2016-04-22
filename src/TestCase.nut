@@ -4,6 +4,8 @@
  */
 local ImpTestCase = class {
 
+  static version = [0, 5, 0];
+
   runner = null; // runner instance
   session = null; // session name
   assertions = 0;
@@ -16,6 +18,18 @@ local ImpTestCase = class {
     this.runner.log(
         ImpUnitMessage(ImpUnitMessageTypes.externalCommand, {
           "command": command
+        })
+    );
+  }
+
+  /**
+   * Output an info message
+   * @param {*=""} message
+   */
+  function info(message = "") {
+    this.runner.log(
+        ImpUnitMessage(ImpUnitMessageTypes.info, {
+          "message": message
         })
     );
   }
