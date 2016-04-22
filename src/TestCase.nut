@@ -4,6 +4,8 @@
  */
 local ImpTestCase = class {
 
+  static version = [0, 5, 0];
+
   runner = null; // runner instance
   session = null; // session name
   assertions = 0;
