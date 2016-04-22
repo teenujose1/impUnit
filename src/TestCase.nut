@@ -21,6 +21,18 @@ local ImpTestCase = class {
   }
 
   /**
+   * Output an info message
+   * @param {*=""} message
+   */
+  function info(message = "") {
+    this.runner.log(
+        ImpUnitMessage(ImpUnitMessageTypes.info, {
+          "message": message
+        })
+    );
+  }
+
+  /**
    * Assert that something is true
    * @param {bool} condition
    * @param {string} message
