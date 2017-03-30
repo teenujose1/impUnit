@@ -1,3 +1,4 @@
+#require "promise.class.nut:3.0.0"
 // MIT License
 //
 // Copyright 2016-2017 Electric Imp
@@ -26,13 +27,11 @@
  * impUnit Test Framework
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 0.5.0
+ * @version 1.0.0
  * @package ImpUnit
  */
 
 // libs required by impUnit
-
-// #require "promise.class.nut:3.0.0"
 
 @include __PATH__+"/lib/JSONEncoder.mod.nut"
 
