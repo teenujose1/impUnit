@@ -1,8 +1,33 @@
+#require "promise.class.nut:3.0.0"
+// MIT License
+//
+// Copyright 2016-2017 Electric Imp
+//
+// SPDX-License-Identifier: MIT
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+// EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+// OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+
 /**
  * impUnit Test Framework
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 0.5.0
+ * @version 1.0.0
  * @package ImpUnit
  */
 
@@ -200,178 +225,8 @@ function __module_ImpUnit_JSONEncoder() {
   return exports;
 }
 
-/**
- * Promise class for Squirrel (Electric Imp)
- * This file is licensed under the MIT License
- *
- * Initial version: 08-12-2015
- *
- * @see https://www.promisejs.org/implementing/
- *
- * @copyright (c) 2015 SMS Diagnostics Pty Ltd
- * @author Aron Steg
- * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 1.1.0-impUnit
- *
- *  impUnit chages:
- *   - packaging as module
- *   - isPendinng()
- */
-function __module_ImpUnit_Promise() {
-  local exports = class {
-
-      static version = [1, 1, 0, "impUnit"];
-
-      _state = null;
-      _value = null;
-      _handlers = null;
-
-      constructor(fn) {
-
-          const PROMISE_STATE_PENDING = 0;
-          const PROMISE_STATE_FULFILLED = 1;
-          const PROMISE_STATE_REJECTED = 2;
-
-          _state = PROMISE_STATE_PENDING;
-          _handlers = [];
-          _doResolve(fn, _resolve, _reject);
-      }
-
-      // **** Private functions ****
-
-      function _fulfill(result) {
-          _state = PROMISE_STATE_FULFILLED;
-          _value = result;
-          foreach (handler in _handlers) {
-              _handle(handler);
-          }
-          _handlers = null;
-      }
-
-      function _reject(error) {
-          _state = PROMISE_STATE_REJECTED;
-          _value = error;
-          foreach (handler in _handlers) {
-              _handle(handler);
-          }
-          _handlers = null;
-      }
-
-      function _resolve(result) {
-          try {
-              local then = _getThen(result);
-              if (then) {
-                  _doResolve(then.bindenv(result), _resolve, _reject);
-                  return;
-              }
-              _fulfill(result);
-          } catch (e) {
-              _reject(e);
-          }
-      }
-
-     /**
-      * Check if a value is a Promise and, if it is,
-      * return the `then` method of that promise.
-      *
-      * @param {Promise|*} value
-      * @return {function|null}
-      */
-      function _getThen(value) {
-
-          if (
-              // detect that the value is some form of Promise
-              // by the fact it has .then() method
-              (typeof value == "instance")
-              && ("then" in value)
-              && (typeof value.then == "function")
-            ) {
-              return value.then;
-          }
-
-          return null;
-      }
-
-      function _doResolve(fn, onFulfilled, onRejected) {
-          local done = false;
-          try {
-              fn(
-                  function (value = null /* allow resolving without argument */) {
-                      if (done) return;
-                      done = true;
-                      onFulfilled(value)
-                  }.bindenv(this),
-
-                  function (reason = null /* allow rejection without argument */) {
-                      if (done) return;
-                      done = true;
-                      onRejected(reason)
-                  }.bindenv(this)
-              )
-          } catch (ex) {
-              if (done) return;
-              done = true;
-              onRejected(ex);
-          }
-      }
-
-      function _handle(handler) {
-          if (_state == PROMISE_STATE_PENDING) {
-              _handlers.push(handler);
-          } else {
-              if (_state == PROMISE_STATE_FULFILLED && typeof handler.onFulfilled == "function") {
-                  handler.onFulfilled(_value);
-              }
-              if (_state == PROMISE_STATE_REJECTED && typeof handler.onRejected == "function") {
-                  handler.onRejected(_value);
-              }
-          }
-      }
-
-      // **** Public functions ****
-
-      /**
-       * Execute handler once the Promise is resolved/rejected
-       * @param {function|null} onFulfilled
-       * @param {function|null} onRejected
-       */
-      function then(onFulfilled = null, onRejected = null) {
-          // ensure we are always asynchronous
-          imp.wakeup(0, function () {
-              _handle({ onFulfilled=onFulfilled, onRejected=onRejected });
-          }.bindenv(this));
-
-          return this;
-      }
-
-      /**
-       * Execute handler on failure
-       * @param {function|null} onRejected
-       */
-      function fail(onRejected = null) {
-          return then(null, onRejected);
-      }
-
-      /**
-       * Execute handler both on success and failure
-       * @param {function|null} always
-       */
-      function finally(always = null) {
-        return then(always, always);
-      }
-
-      // impUnit additions
-
-      function isPending() {
-        return this._state == PROMISE_STATE_PENDING;
-      }
-  }
-
-  return exports;
-}
-
 // impUnit module
-function __module_impUnit(Promise, JSONEncoder) {
+function __module_impUnit(JSONEncoder) {
 /**
  * Message handling
  * @package ImpUnit
@@ -846,8 +701,9 @@ local ImpUnitRunner = class {
 
         test.timedOut <- false;
 
+        local isPending = true;
         test.timerId <- imp.wakeup(this.timeout, function () {
-          if (test.result.isPending()) {
+          if (isPending) {
             test.timedOut = true;
 
             // update assertions counter to ignore assertions afrer the timeout
@@ -863,11 +719,13 @@ local ImpUnitRunner = class {
 
           // we're fine
           .then(function (message) {
+            isPending = false;
             test.message <- message;
           })
 
           // we're screwed
           .fail(function (error) {
+            isPending = false;
             test.error <- error;
           })
 
@@ -920,12 +778,10 @@ local ImpUnitRunner = class {
 }
 
 // resolve modules
-__module_ImpUnit_Promise_exports <- __module_ImpUnit_Promise();
 __module_ImpUnit_JSONEncoder_exports <- __module_ImpUnit_JSONEncoder();
-__module_impUnit_exports <- __module_impUnit(__module_ImpUnit_Promise_exports, __module_ImpUnit_JSONEncoder_exports);
+__module_impUnit_exports <- __module_impUnit(__module_ImpUnit_JSONEncoder_exports);
 
 // add symbols to root scope for old-scool usage
-Promise <- __module_ImpUnit_Promise_exports;
 ImpTestCase <- __module_impUnit_exports.ImpTestCase;
 ImpUnitRunner <- __module_impUnit_exports.ImpUnitRunner;
 
