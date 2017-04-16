@@ -1,4 +1,5 @@
 #require "promise.class.nut:3.0.0"
+#require "JSONEncoder.class.nut:2.0.0"
 // MIT License
 //
 // Copyright 2016-2017 Electric Imp
@@ -31,12 +32,8 @@
  * @package ImpUnit
  */
 
-// libs required by impUnit
-
-@include __PATH__+"/lib/JSONEncoder.mod.nut"
-
 // impUnit module
-function __module_impUnit(JSONEncoder) {
+function __module_impUnit() {
 @include __PATH__+"/src/ImpUnit.nut"
   // export symbols
   return {
@@ -46,8 +43,7 @@ function __module_impUnit(JSONEncoder) {
 }
 
 // resolve modules
-__module_ImpUnit_JSONEncoder_exports <- __module_ImpUnit_JSONEncoder();
-__module_impUnit_exports <- __module_impUnit(__module_ImpUnit_JSONEncoder_exports);
+__module_impUnit_exports <- __module_impUnit();
 
 // add symbols to root scope for old-scool usage
 ImpTestCase <- __module_impUnit_exports.ImpTestCase;
