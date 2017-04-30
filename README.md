@@ -1,16 +1,7 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+#Testing Framework for EI/Squirrel
 
+Unit Testing Framework is for automated unit testing.
 
-- [impUnit](#impunit)
-  - [License](#license)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-# impUnit
-
-Unit Testing Framework for EI/Squirrel.
-
-## License
+### License
 
 The code in this repository is licensed under [MIT License](./LICENSE).
