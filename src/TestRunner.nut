@@ -32,7 +32,7 @@
  */
 local ImpUnitRunner = class {
 
-  static version = [0, 5, 0];
+  static version = [0, 6, 0];
 
   // options
   timeout = 2;
@@ -44,6 +44,10 @@ local ImpUnitRunner = class {
   tests = 0;
   assertions = 0;
   failures = 0;
+
+  // look in the current Runner the individual test to run
+  testClass = "";
+  testCase = "";
 
   _testsGenerator = null;
 
@@ -81,6 +85,9 @@ local ImpUnitRunner = class {
 
     foreach (rootKey, rootValue in getroottable()) {
       if (type(rootValue) == "class" && rootValue.getbase() == ImpTestCase) {
+        if (testClass.len() > 0 && testClass != rootKey) {
+          continue;
+        }
 
         local testCaseName = rootKey;
         local testCaseClass = rootValue;
@@ -94,6 +101,9 @@ local ImpUnitRunner = class {
         // find test methoids
         foreach (memberKey, memberValue in testCaseClass) {
           if (memberKey.len() >= 4 && memberKey.slice(0, 4) == "test") {
+            if (testCase.len() > 0 && testCase != memberKey) {
+              continue;
+            }
             testCases[testCaseName].tests.push(memberKey);
           }
         }

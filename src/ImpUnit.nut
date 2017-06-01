@@ -23,5 +23,5 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 @include __PATH__+"/Message.nut"
-@include __PATH__+"/TestCase.nut"
+@include __PATH__+"/ImpTestCase.nut"
 @include __PATH__+"/TestRunner.nut"
