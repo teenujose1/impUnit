@@ -1,377 +1,39 @@
+#require "promise.class.nut:3.0.0"
+#require "JSONEncoder.class.nut:2.0.0"
+// MIT License
+//
+// Copyright 2016-2017 Electric Imp
+//
+// SPDX-License-Identifier: MIT
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+// EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+// OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+
 /**
  * impUnit Test Framework
  *
  * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 0.5.0
+ * @version 1.0.0
  * @package ImpUnit
  */
 
-// libs required by impUnit
-
-/**
- * JSON encoder
- *
- * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @verion 0.4.0-impUnit
- *
- *  impUnit chages:
- *   - packaging as module
- */
-function __module_ImpUnit_JSONEncoder() {
-  local exports = class {
-
-    static version = [0, 4, 0, "impUnit"];
-
-    // max structure depth
-    // anything above probably has a cyclic ref
-    static _maxDepth = 32;
-
-    /**
-     * Encode value to JSON
-     * @param {table|array|*} value
-     * @returns {string}
-     */
-    function encode(value) {
-      return this._encode(value);
-    }
-
-    /**
-     * @param {table|array} val
-     * @param {integer=0} depth – current depth level
-     * @private
-     */
-    function _encode(val, depth = 0) {
-
-      // detect cyclic reference
-      if (depth > this._maxDepth) {
-        throw "Possible cyclic reference";
-      }
-
-      local
-        r = "",
-        s = "",
-        i = 0;
-
-      switch (typeof val) {
-
-        case "table":
-        case "class":
-          s = "";
-
-          // serialize properties, but not functions
-          foreach (k, v in val) {
-            if (typeof v != "function") {
-              s += ",\"" + k + "\":" + this._encode(v, depth + 1);
-            }
-          }
-
-          s = s.len() > 0 ? s.slice(1) : s;
-          r += "{" + s + "}";
-          break;
-
-        case "array":
-          s = "";
-
-          for (i = 0; i < val.len(); i++) {
-            s += "," + this._encode(val[i], depth + 1);
-          }
-
-          s = (i > 0) ? s.slice(1) : s;
-          r += "[" + s + "]";
-          break;
-
-        case "integer":
-        case "float":
-        case "bool":
-          r += val;
-          break;
-
-        case "null":
-          r += "null";
-          break;
-
-        case "instance":
-
-          if ("_serialize" in val && typeof val._serialize == "function") {
-
-            // serialize instances by calling _serialize method
-            r += this._encode(val._serialize(), depth + 1);
-
-          } else {
-
-            s = "";
-
-            try {
-
-              // iterate through instances which implement _nexti meta-method
-              foreach (k, v in val) {
-                s += ",\"" + k + "\":" + this._encode(v, depth + 1);
-              }
-
-            } catch (e) {
-
-              // iterate through instances w/o _nexti
-              // serialize properties, but not functions
-              foreach (k, v in val.getclass()) {
-                if (typeof v != "function") {
-                  s += ",\"" + k + "\":" + this._encode(val[k], depth + 1);
-                }
-              }
-
-            }
-
-            s = s.len() > 0 ? s.slice(1) : s;
-            r += "{" + s + "}";
-          }
-
-          break;
-
-        // strings and all other
-        default:
-          r += "\"" + this._escape(val.tostring()) + "\"";
-          break;
-      }
-
-      return r;
-    }
-
-    /**
-     * Escape strings according to http://www.json.org/ spec
-     * @param {string} str
-     */
-    function _escape(str) {
-      local res = "";
-
-      for (local i = 0; i < str.len(); i++) {
-
-        local ch1 = (str[i] & 0xFF);
-
-        if ((ch1 & 0x80) == 0x00) {
-          // 7-bit Ascii
-
-          ch1 = format("%c", ch1);
-
-          if (ch1 == "\"") {
-            res += "\\\"";
-          } else if (ch1 == "\\") {
-            res += "\\\\";
-          } else if (ch1 == "/") {
-            res += "\\/";
-          } else if (ch1 == "\b") {
-            res += "\\b";
-          } else if (ch1 == "\f") {
-            res += "\\f";
-          } else if (ch1 == "\n") {
-            res += "\\n";
-          } else if (ch1 == "\r") {
-            res += "\\r";
-          } else if (ch1 == "\t") {
-            res += "\\t";
-          } else {
-            res += ch1;
-          }
-
-        } else {
-
-          if ((ch1 & 0xE0) == 0xC0) {
-            // 110xxxxx = 2-byte unicode
-            local ch2 = (str[++i] & 0xFF);
-            res += format("%c%c", ch1, ch2);
-          } else if ((ch1 & 0xF0) == 0xE0) {
-            // 1110xxxx = 3-byte unicode
-            local ch2 = (str[++i] & 0xFF);
-            local ch3 = (str[++i] & 0xFF);
-            res += format("%c%c%c", ch1, ch2, ch3);
-          } else if ((ch1 & 0xF8) == 0xF0) {
-            // 11110xxx = 4 byte unicode
-            local ch2 = (str[++i] & 0xFF);
-            local ch3 = (str[++i] & 0xFF);
-            local ch4 = (str[++i] & 0xFF);
-            res += format("%c%c%c%c", ch1, ch2, ch3, ch4);
-          }
-
-        }
-      }
-
-      return res;
-    }
-  }
-
-  return exports;
-}
-
-/**
- * Promise class for Squirrel (Electric Imp)
- * This file is licensed under the MIT License
- *
- * Initial version: 08-12-2015
- *
- * @see https://www.promisejs.org/implementing/
- *
- * @copyright (c) 2015 SMS Diagnostics Pty Ltd
- * @author Aron Steg
- * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 1.1.0-impUnit
- *
- *  impUnit chages:
- *   - packaging as module
- *   - isPendinng()
- */
-function __module_ImpUnit_Promise() {
-  local exports = class {
-
-      static version = [1, 1, 0, "impUnit"];
-
-      _state = null;
-      _value = null;
-      _handlers = null;
-
-      constructor(fn) {
-
-          const PROMISE_STATE_PENDING = 0;
-          const PROMISE_STATE_FULFILLED = 1;
-          const PROMISE_STATE_REJECTED = 2;
-
-          _state = PROMISE_STATE_PENDING;
-          _handlers = [];
-          _doResolve(fn, _resolve, _reject);
-      }
-
-      // **** Private functions ****
-
-      function _fulfill(result) {
-          _state = PROMISE_STATE_FULFILLED;
-          _value = result;
-          foreach (handler in _handlers) {
-              _handle(handler);
-          }
-          _handlers = null;
-      }
-
-      function _reject(error) {
-          _state = PROMISE_STATE_REJECTED;
-          _value = error;
-          foreach (handler in _handlers) {
-              _handle(handler);
-          }
-          _handlers = null;
-      }
-
-      function _resolve(result) {
-          try {
-              local then = _getThen(result);
-              if (then) {
-                  _doResolve(then.bindenv(result), _resolve, _reject);
-                  return;
-              }
-              _fulfill(result);
-          } catch (e) {
-              _reject(e);
-          }
-      }
-
-     /**
-      * Check if a value is a Promise and, if it is,
-      * return the `then` method of that promise.
-      *
-      * @param {Promise|*} value
-      * @return {function|null}
-      */
-      function _getThen(value) {
-
-          if (
-              // detect that the value is some form of Promise
-              // by the fact it has .then() method
-              (typeof value == "instance")
-              && ("then" in value)
-              && (typeof value.then == "function")
-            ) {
-              return value.then;
-          }
-
-          return null;
-      }
-
-      function _doResolve(fn, onFulfilled, onRejected) {
-          local done = false;
-          try {
-              fn(
-                  function (value = null /* allow resolving without argument */) {
-                      if (done) return;
-                      done = true;
-                      onFulfilled(value)
-                  }.bindenv(this),
-
-                  function (reason = null /* allow rejection without argument */) {
-                      if (done) return;
-                      done = true;
-                      onRejected(reason)
-                  }.bindenv(this)
-              )
-          } catch (ex) {
-              if (done) return;
-              done = true;
-              onRejected(ex);
-          }
-      }
-
-      function _handle(handler) {
-          if (_state == PROMISE_STATE_PENDING) {
-              _handlers.push(handler);
-          } else {
-              if (_state == PROMISE_STATE_FULFILLED && typeof handler.onFulfilled == "function") {
-                  handler.onFulfilled(_value);
-              }
-              if (_state == PROMISE_STATE_REJECTED && typeof handler.onRejected == "function") {
-                  handler.onRejected(_value);
-              }
-          }
-      }
-
-      // **** Public functions ****
-
-      /**
-       * Execute handler once the Promise is resolved/rejected
-       * @param {function|null} onFulfilled
-       * @param {function|null} onRejected
-       */
-      function then(onFulfilled = null, onRejected = null) {
-          // ensure we are always asynchronous
-          imp.wakeup(0, function () {
-              _handle({ onFulfilled=onFulfilled, onRejected=onRejected });
-          }.bindenv(this));
-
-          return this;
-      }
-
-      /**
-       * Execute handler on failure
-       * @param {function|null} onRejected
-       */
-      function fail(onRejected = null) {
-          return then(null, onRejected);
-      }
-
-      /**
-       * Execute handler both on success and failure
-       * @param {function|null} always
-       */
-      function finally(always = null) {
-        return then(always, always);
-      }
-
-      // impUnit additions
-
-      function isPending() {
-        return this._state == PROMISE_STATE_PENDING;
-      }
-  }
-
-  return exports;
-}
-
 // impUnit module
-function __module_impUnit(Promise, JSONEncoder) {
+function __module_impUnit() {
 /**
  * Message handling
  * @package ImpUnit
@@ -846,8 +508,9 @@ local ImpUnitRunner = class {
 
         test.timedOut <- false;
 
+        local isPending = true;
         test.timerId <- imp.wakeup(this.timeout, function () {
-          if (test.result.isPending()) {
+          if (isPending) {
             test.timedOut = true;
 
             // update assertions counter to ignore assertions afrer the timeout
@@ -863,11 +526,13 @@ local ImpUnitRunner = class {
 
           // we're fine
           .then(function (message) {
+            isPending = false;
             test.message <- message;
           })
 
           // we're screwed
           .fail(function (error) {
+            isPending = false;
             test.error <- error;
           })
 
@@ -920,12 +585,9 @@ local ImpUnitRunner = class {
 }
 
 // resolve modules
-__module_ImpUnit_Promise_exports <- __module_ImpUnit_Promise();
-__module_ImpUnit_JSONEncoder_exports <- __module_ImpUnit_JSONEncoder();
-__module_impUnit_exports <- __module_impUnit(__module_ImpUnit_Promise_exports, __module_ImpUnit_JSONEncoder_exports);
+__module_impUnit_exports <- __module_impUnit();
 
 // add symbols to root scope for old-scool usage
-Promise <- __module_ImpUnit_Promise_exports;
 ImpTestCase <- __module_impUnit_exports.ImpTestCase;
 ImpUnitRunner <- __module_impUnit_exports.ImpUnitRunner;
 
