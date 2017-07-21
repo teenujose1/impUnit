@@ -238,7 +238,7 @@ local ImpUnitRunner = class {
       }
 
       // detect if test is async
-      test.async <- test.result instanceof Promise;
+      test.async <- "Promise" in getroottable() && test.result instanceof Promise;
 
       if (test.async) {
 
