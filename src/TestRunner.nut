@@ -84,7 +84,7 @@ local ImpUnitRunner = class {
     local testCases = {};
 
     foreach (rootKey, rootValue in getroottable()) {
-      if (type(rootValue) == "class" && rootValue.getbase() == ImpTestCase) {
+      if (type(rootValue) == "class" && rootValue instanceof ImpTestCase) {
         if (testClass.len() > 0 && testClass != rootKey) {
           continue;
         }
