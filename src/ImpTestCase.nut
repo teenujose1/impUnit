@@ -28,7 +28,7 @@
  */
 local ImpTestCase = class {
 
-  static version = [0, 5, 0];
+  static VERSION = "1.0.0";
 
   runner = null; // runner instance
   session = null; // session name
