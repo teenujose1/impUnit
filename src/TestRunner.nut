@@ -84,7 +84,14 @@ local ImpUnitRunner = class {
     local testCases = {};
 
     foreach (rootKey, rootValue in getroottable()) {
-      if (type(rootValue) == "class" && rootValue.getbase() == ImpTestCase) {
+      if (type(rootValue) == "class") {
+        local bc = rootValue.getbase();
+        while (bc != null && bc != ImpTestCase) {
+          bc = bc.getbase();
+        }
+        if (bc != ImpTestCase) {
+          continue;
+        }
         if (testClass.len() > 0 && testClass != rootKey) {
           continue;
         }
@@ -238,7 +245,7 @@ local ImpUnitRunner = class {
       }
 
       // detect if test is async
-      test.async <- test.result instanceof Promise;
+      test.async <- "Promise" in getroottable() && test.result instanceof Promise;
 
       if (test.async) {
 
