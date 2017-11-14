@@ -1,5 +1,3 @@
-#require "promise.class.nut:3.0.1"
-#require "JSONEncoder.class.nut:2.0.0"
 // MIT License
 //
 // Copyright 2016-2017 Electric Imp
@@ -24,13 +22,8 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-/**
- * impUnit Test Framework
- *
- * @author Mikhail Yurasov <mikhail@electricimp.com>
- * @version 1.0.0
- * @package ImpUnit
- */
+#require "promise.class.nut:3.0.1"
+#require "JSONEncoder.class.nut:2.0.0"
 
 // impUnit module
 function __module_impUnit() {
