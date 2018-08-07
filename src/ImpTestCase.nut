@@ -137,11 +137,10 @@ local ImpTestCase = class {
       throw "Possible cyclic reference at " + cleanPath(path);
     }
 
-    switch (typeof value1) {
+    switch (type(value1)) {
       case "table":
       case "class":
       case "array":
-      case "blob":
 
         foreach (k, v in value1) {
           path += "." + k;
@@ -152,6 +151,34 @@ local ImpTestCase = class {
           }
 
           this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
+        }
+
+        break;
+
+      case "meta":
+
+        switch(typeof value1) {
+          case "blob":
+            foreach (k, v in value1) {
+              path += "." + k;
+
+              if (!(k in value2)) {
+                throw format("%s slot [%s] in actual value",
+                  isForwardPass ? "Missing" : "Extra", cleanPath(path));
+              }
+
+              this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
+            }
+
+            break;
+
+          default:
+
+            if (value2 != value1) {
+              throw format(message, cleanPath(path), value1 + "", value2 + "");
+            }
+
+            break;
         }
 
         break;
