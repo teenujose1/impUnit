@@ -141,6 +141,7 @@ local ImpTestCase = class {
       case "table":
       case "class":
       case "array":
+      case "blob":
 
         foreach (k, v in value1) {
           path += "." + k;
