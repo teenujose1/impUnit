@@ -137,7 +137,7 @@ local ImpTestCase = class {
       throw "Possible cyclic reference at " + cleanPath(path);
     }
 
-    switch (type(value1)) {
+    switch (typeof value1) {
       case "table":
       case "class":
       case "array":
