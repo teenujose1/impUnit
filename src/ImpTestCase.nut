@@ -159,15 +159,22 @@ local ImpTestCase = class {
 
         switch(typeof value1) {
           case "blob":
-            foreach (k, v in value1) {
-              path += "." + k;
 
-              if (!(k in value2)) {
-                throw format("%s slot [%s] in actual value",
-                  isForwardPass ? "Missing" : "Extra", cleanPath(path));
+            if (value1.len() != value2.len()) {
+              throw format("Blob lengths unequal, lhs.len() == %d, rhs.len() == %d", value1.len(), value2.len());
+            }
+
+            if (value1.len() > 0) {
+              foreach (k, v in value1) {
+                path += "." + k;
+
+                if (!(k in value2)) {
+                  throw format("%s slot [%s] in actual value",
+                    isForwardPass ? "Missing" : "Extra", cleanPath(path));
+                }
+
+                this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
               }
-
-              this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
             }
 
             break;
