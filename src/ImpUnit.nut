@@ -27,6 +27,6 @@
 @include __PATH__+"/TestRunner.nut"
 
 class ImpUnit {
-  static VERSION = "1.2.0";
+  static VERSION = "1.2.1";
 }
 
