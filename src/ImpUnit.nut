@@ -25,3 +25,8 @@
 @include __PATH__+"/Message.nut"
 @include __PATH__+"/ImpTestCase.nut"
 @include __PATH__+"/TestRunner.nut"
+
+class ImpUnit {
+  static VERSION = "1.2.0";
+}
+

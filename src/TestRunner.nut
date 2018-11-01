@@ -32,8 +32,6 @@
  */
 local ImpUnitRunner = class {
 
-  static version = [0, 6, 0];
-
   // options
   timeout = 2;
   readableOutput = true;
