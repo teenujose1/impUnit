@@ -118,9 +118,6 @@ local ImpUnitRunner = class {
       }
     }
 
-    // [debug]
-    this.log(ImpUnitMessage(ImpUnitMessageTypes.debug, {"testCasesFound": testCases}));
-
     return testCases;
   }
 
