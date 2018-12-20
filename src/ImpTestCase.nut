@@ -70,7 +70,8 @@ local ImpTestCase = class {
 
   /**
    * Assert that two values are equal
-   * @param {bool} condition
+   * @param {number|*} expected
+   * @param {number|*} actual
    * @param {string} message
    */
    function assertEqual(expected, actual, message = "Expected value: %s, got: %s") {
@@ -108,7 +109,9 @@ local ImpTestCase = class {
 
   /**
    * Assert that two values are within a certain range
-   * @param {bool} condition
+   * @param {number|*} expected
+   * @param {number|*} actual
+   * @param {number|*} maxDiff
    * @param {string} message
    */
   function assertClose(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
@@ -144,8 +147,9 @@ local ImpTestCase = class {
           path += "." + k;
 
           if (!(k in value2)) {
-            throw format("%s slot [%s] in actual value",
-              isForwardPass ? "Missing" : "Extra", cleanPath(path));
+            throw format(message, cleanPath(path),
+              isForwardPass ? v + "" : "undefined",
+              isForwardPass ? "undefined" : v + "");
           }
 
           this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
