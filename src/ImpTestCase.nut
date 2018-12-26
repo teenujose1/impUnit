@@ -176,7 +176,7 @@ local ImpTestCase = class {
    * @param {*} actual
    * @param {string} message
    */
-  function assertDeepEqual(expected, actual, message = "At [%s]: expected \"%s\", got \"%s\"") {
+  function assertDeepEqual(expected, actual, message = "Object comparison failed on [%s]: expected \"%s\", got \"%s\"") {
     this.assertions++;
     this._assertDeepEqual(expected, actual, message, true); // forward pass
     this._assertDeepEqual(actual, expected, message, false); // backwards pass
