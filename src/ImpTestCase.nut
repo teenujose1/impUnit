@@ -148,8 +148,8 @@ local ImpTestCase = class {
 
           if (!(k in value2)) {
             throw format(message, cleanPath(path),
-              isForwardPass ? v + "" : "undefined",
-              isForwardPass ? "undefined" : v + "");
+              isForwardPass ? v + "" : "none",
+              isForwardPass ? "none" : v + "");
           }
 
           this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
@@ -176,7 +176,7 @@ local ImpTestCase = class {
    * @param {*} actual
    * @param {string} message
    */
-  function assertDeepEqual(expected, actual, message = "Object comparison failed on [%s]: expected \"%s\", got \"%s\"") {
+  function assertDeepEqual(expected, actual, message = "Comparison failed on '%s': expected %s, got %s") {
     this.assertions++;
     this._assertDeepEqual(expected, actual, message, true); // forward pass
     this._assertDeepEqual(actual, expected, message, false); // backwards pass
