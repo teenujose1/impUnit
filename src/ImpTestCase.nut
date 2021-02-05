@@ -164,17 +164,8 @@ local ImpTestCase = class {
               throw format("Blob lengths unequal, lhs.len() == %d, rhs.len() == %d", value1.len(), value2.len());
             }
 
-            if (value1.len() > 0) {
-              foreach (k, v in value1) {
-                path += "." + k;
-
-                if (!(k in value2)) {
-                  throw format("%s slot [%s] in actual value",
-                    isForwardPass ? "Missing" : "Extra", cleanPath(path));
-                }
-
-                this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
-              }
+            if (crypto.equals(value1, value2) == false) {
+              throw format("Blobs are the same length (%d bytes), but the contents are not identical.", value1.len());
             }
 
             break;
