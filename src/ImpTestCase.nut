@@ -137,6 +137,10 @@ local ImpTestCase = class {
       throw "Possible cyclic reference at " + cleanPath(path);
     }
 
+    if (typeof value1 != typeof value2) {
+      throw format("Values are not the same type, typeof lhs = %s, typeof rhs = %s", typeof value1, typeof value2)
+    }
+
     switch (type(value1)) {
       case "table":
       case "class":
