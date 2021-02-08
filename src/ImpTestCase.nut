@@ -28,8 +28,6 @@
  */
 local ImpTestCase = class {
 
-  static VERSION = "1.0.0";
-
   runner = null; // runner instance
   session = null; // session name
   assertions = 0;
@@ -72,7 +70,8 @@ local ImpTestCase = class {
 
   /**
    * Assert that two values are equal
-   * @param {bool} condition
+   * @param {number|*} expected
+   * @param {number|*} actual
    * @param {string} message
    */
    function assertEqual(expected, actual, message = "Expected value: %s, got: %s") {
@@ -110,7 +109,9 @@ local ImpTestCase = class {
 
   /**
    * Assert that two values are within a certain range
-   * @param {bool} condition
+   * @param {number|*} expected
+   * @param {number|*} actual
+   * @param {number|*} maxDiff
    * @param {string} message
    */
   function assertClose(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
@@ -150,8 +151,9 @@ local ImpTestCase = class {
           local extendedPath = path + "." + k;
 
           if (!(k in value2)) {
-            throw format("%s slot [%s] in actual value",
-              isForwardPass ? "Missing" : "Extra", cleanPath(extendedPath));
+            throw format(message, cleanPath(extendedPath),
+              isForwardPass ? v + "" : "none",
+              isForwardPass ? "none" : v + "");
           }
 
           this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, extendedPath, level + 1);
@@ -204,7 +206,7 @@ local ImpTestCase = class {
    * @param {*} actual
    * @param {string} message
    */
-  function assertDeepEqual(expected, actual, message = "At [%s]: expected \"%s\", got \"%s\"") {
+  function assertDeepEqual(expected, actual, message = "Comparison failed on '%s': expected %s, got %s") {
     this.assertions++;
     this._assertDeepEqual(expected, actual, message, true); // forward pass
     this._assertDeepEqual(actual, expected, message, false); // backwards pass

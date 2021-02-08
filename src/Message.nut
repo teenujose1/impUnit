@@ -44,8 +44,6 @@ local ImpUnitMessageTypes = {
  */
 local ImpUnitMessage = class {
 
-  static VERSION = "0.5.0";
-
   type = "";
   message = "";
   session = "";
