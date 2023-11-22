@@ -22,7 +22,7 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-#require "promise.class.nut:3.0.1"
+#require "promise.class.nut:4.0.0"
 #require "JSONEncoder.class.nut:2.0.0"
 
 // impUnit module
