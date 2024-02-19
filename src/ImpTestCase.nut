@@ -116,7 +116,7 @@ local ImpTestCase = class {
    */
   function assertClose(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
     this.assertions++;
-    if (math.abs(expected - actual) > maxDiff) {
+    if (math.fabs(expected - actual) > maxDiff) {
       throw format(message, expected + "", maxDiff + "", actual + "");
     }
   }
@@ -138,51 +138,21 @@ local ImpTestCase = class {
       throw "Possible cyclic reference at " + cleanPath(path);
     }
 
-    if (typeof value1 != typeof value2) {
-      throw format("Values are not the same type, typeof lhs = %s, typeof rhs = %s", typeof value1, typeof value2)
-    }
-
     switch (type(value1)) {
       case "table":
       case "class":
       case "array":
 
         foreach (k, v in value1) {
-          local extendedPath = path + "." + k;
+          path += "." + k;
 
           if (!(k in value2)) {
-            throw format(message, cleanPath(extendedPath),
+            throw format(message, cleanPath(path),
               isForwardPass ? v + "" : "none",
               isForwardPass ? "none" : v + "");
           }
 
-          this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, extendedPath, level + 1);
-        }
-
-        break;
-
-      case "meta":
-
-        switch(typeof value1) {
-          case "blob":
-
-            if (value1.len() != value2.len()) {
-              throw format("Blob lengths unequal, lhs.len() == %d, rhs.len() == %d", value1.len(), value2.len());
-            }
-
-            if (crypto.equals(value1, value2) == false) {
-              throw format("Blobs are the same length (%d bytes), but the contents are not identical.", value1.len());
-            }
-
-            break;
-
-          default:
-
-            if (value2 != value1) {
-              throw format(message, cleanPath(path), value1 + "", value2 + "");
-            }
-
-            break;
+          this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
         }
 
         break;
